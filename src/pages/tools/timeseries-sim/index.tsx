@@ -5,6 +5,7 @@ import {
   Box,
   Card,
   CardContent,
+  Button,
   CardHeader,
   Dialog,
   DialogContent,
@@ -24,74 +25,115 @@ import {
   continents,
   recommendationDict,
 } from "src/components/timeseries-sim/variables/variables";
-import GraphArea from "src/components/timeseries-sim/GraphArea";
-import { alignmentPlot } from "src/components/timeseries-sim/plotfunctions/alignmentplot";
-import BenchmarkCountryList from "src/components/timeseries-sim/BenchmarkCountryList";
-import TimeSeriesBag from "src/components/timeseries-sim/TimeSeriesBag";
-import ComparePopUp from "src/components/timeseries-sim/ComparePopUp";
-import { benchmarkPlot } from "src/components/timeseries-sim/plotfunctions/benchmarkplot";
-import PredictPopUp from "src/components/timeseries-sim/PredictPopUp";
-import { predictPlot } from "src/components/timeseries-sim/plotfunctions/predictplot";
-import InfoPopUp from "src/components/timeseries-sim/InfoPopUp";
-import CircularProgress from "@mui/material/CircularProgress";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import WarningIcon from "@mui/icons-material/Warning";
-import InfoIcon from "@mui/icons-material/Info";
-import ErrorIcon from "@mui/icons-material/Error";
+
+import { heatmapVats } from "src/components/timeseries-sim/plotfunctions/heatmap";
+import { manhattanVats } from "src/components/timeseries-sim/plotfunctions/manhattan";
 const API = process.env.NEXT_PUBLIC_API_PY;
 const API_PY = API + "/timeseries-sim-search";
-const today = new Date();
-const lastDate = new Date(today.setDate(today.getDate() - 1));
-const firstDate = new Date(today.setDate(today.getDate() - 30));
-
-const dateParse = function (date) {
-  return (
-    String(date.getFullYear()) +
-    "-" +
-    String(date.getMonth() + 1).padStart(2, "0") +
-    "-" +
-    String(date.getDate()).padStart(2, "0")
-  );
-};
-
-const initialFirstRunState = {
-  // default user parameters for timeseries search
-  targetCountry: "Belgium",
-  firstDate: dateParse(firstDate),
-  lastDate: dateParse(lastDate),
-  indicator: "biweekly_cases_per_million",
-  method: ["euclidean"],
-  numberOfResults: 20,
-  minPopulation: 600000,
-  startDate: "2021-01-01",
-  endDate: dateParse(lastDate),
-  continentCheck: {
-    Africa: true,
-    Asia: true,
-    Australia: true,
-    Europe: true,
-    "North America": true,
-    "South America": true,
-    Oceania: true,
-  },
-};
-
-const defaultBenchmarkCountries = [
-  // default benchmark countries
-  "France",
-  "Germany",
-  "Switzerland",
-  "Belgium",
-  "Spain",
-  "Italy",
-  "United Kingdom",
-  "Netherlands",
-];
-
-const defaultTimeSeriesBag = [];
 
 const TimeseriesSim = () => {
   //const { settings } = useSettings();
+  const heatmapDataClick = async () => {
+    await heatmapPost();
+  };
+
+  const manhattanDataClick = async () => {
+    await manhattanPost();
+  };
+
+  // heatmap summon prototype using user values
+  const heatmapPost = async () => {
+    //const apiUrl = API_PY + "/predict/";
+    const apiUrl =
+      "http://0.0.0.0:4010" +
+      "/stat/v1/timeseries-sim-search/dnam_corr_generate/";
+
+    const heatmapPostObj = {
+      method: "Pearson",
+    };
+    const response = await axios.post(apiUrl, heatmapPostObj);
+    console.log("response = ", response);
+    if (response.data) {
+      console.log("response.data = ", response.data);
+      heatmapVats(response.data);
+    }
+  };
+
+  const manhattanPost = async () => {
+    const apiUrl =
+      "http://0.0.0.0:4010" +
+      "/stat/v1/timeseries-sim-search/manhattan_generate/";
+
+    const predictObj = {
+      dummy: 10,
+    };
+    const response = await axios.post(apiUrl, predictObj);
+    console.log("response = ", response);
+    if (response.data) {
+      console.log("response.data = ", response.data);
+      manhattanVats(response.data);
+    }
+  };
+
+  return (
+    <>
+      <Helmet>
+        <title>Vats Prototype</title>
+      </Helmet>
+      <Box>
+        <Grid>
+          <Card>
+            <CardContent>Search Bar</CardContent>
+          </Card>
+          <Card>
+            <h2>
+              <Button
+                size="large"
+                variant="contained"
+                color="primary"
+                onClick={heatmapDataClick}
+              >
+                Get heatmap data
+              </Button>
+            </h2>
+          </Card>
+          <Card>
+            <h2>
+              <Button
+                size="large"
+                variant="contained"
+                color="primary"
+                onClick={manhattanDataClick}
+              >
+                Get manhattan data
+              </Button>
+            </h2>
+          </Card>
+          <Card>
+            <CardContent>
+              <div id="heatmapArea" />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent>
+              <div id="manhattanArea" />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Box>
+    </>
+  );
+};
+
+TimeseriesSim.getLayout = function getLayout(page: ReactElement) {
+  return <DashboardLayout>{page}</DashboardLayout>;
+};
+
+export default TimeseriesSim;
+
+/* 
+
 
   const [advancedFilterPopup, setAdvancedFilterPopup] = useState(false); // advanced filter popup state control
   const [infoPopUp, setInfoPopUp] = useState(false);
@@ -212,9 +254,8 @@ const TimeseriesSim = () => {
   const [loadPopUp, setLoadPopUp] = useState(false);
 
   const searchPost = async () => {
-    const apiUrl = API_PY + "/search/";
-    //const apiUrl =
-    "http://0.0.0.0:4010" + "/stat/v1/timeseries-sim-search/search/";
+    //const apiUrl = API_PY + "/search/";
+    const apiUrl ="http://0.0.0.0:4010" + "/stat/v1/timeseries-sim-search/search/";
 
     const response = await axios.post(apiUrl, firstRunForm);
 
@@ -242,8 +283,8 @@ const TimeseriesSim = () => {
   };
 
   const comparePost = async () => {
-    const apiUrl = API_PY + "/compare/";
-    //const apiUrl ="http://0.0.0.0:4010" + "/stat/v1/timeseries-sim-search/compare/";
+    //const apiUrl = API_PY + "/compare/";
+    const apiUrl ="http://0.0.0.0:4010" + "/stat/v1/timeseries-sim-search/compare/";
 
     console.log({ countries: benchmarkCountries });
     const response = await axios.post(apiUrl, {
@@ -257,8 +298,8 @@ const TimeseriesSim = () => {
   };
 
   const predictPost = async () => {
-    const apiUrl = API_PY + "/predict/";
-    //const apiUrl ="http://0.0.0.0:4010" + "/stat/v1/timeseries-sim-search/predict/";
+    //const apiUrl = API_PY + "/predict/";
+    const apiUrl ="http://0.0.0.0:4010" + "/stat/v1/timeseries-sim-search/predict/";
 
     const predictObj = {
       series: timeSeriesBag,
@@ -302,12 +343,9 @@ const TimeseriesSim = () => {
     //plotSwitch();
   };
 
-  return (
-    <>
-      <Helmet>
-        <title>Timeseries Similarity</title>
-      </Helmet>
-      <Box>
+  */
+
+/*
         <Grid container spacing={2} sx={{ marginLeft: "5px" }}>
           <Grid item xs={3} sx={{ minWidth: "350px" }}>
             <Card>
@@ -510,12 +548,156 @@ const TimeseriesSim = () => {
           {errorMessage}
         </Alert>
       </Snackbar>
-    </>
+*/
+
+/* 
+
+const today = new Date();
+const lastDate = new Date(today.setDate(today.getDate() - 1));
+const firstDate = new Date(today.setDate(today.getDate() - 30));
+
+const dateParse = function (date) {
+  return (
+    String(date.getFullYear()) +
+    "-" +
+    String(date.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(date.getDate()).padStart(2, "0")
   );
 };
 
-TimeseriesSim.getLayout = function getLayout(page: ReactElement) {
-  return <DashboardLayout>{page}</DashboardLayout>;
+const initialFirstRunState = {
+  // default user parameters for timeseries search
+  targetCountry: "Belgium",
+  firstDate: dateParse(firstDate),
+  lastDate: dateParse(lastDate),
+  indicator: "biweekly_cases_per_million",
+  method: ["euclidean"],
+  numberOfResults: 20,
+  minPopulation: 600000,
+  startDate: "2021-01-01",
+  endDate: dateParse(lastDate),
+  continentCheck: {
+    Africa: true,
+    Asia: true,
+    Australia: true,
+    Europe: true,
+    "North America": true,
+    "South America": true,
+    Oceania: true,
+  },
 };
 
-export default TimeseriesSim;
+const defaultBenchmarkCountries = [
+  // default benchmark countries
+  "France",
+  "Germany",
+  "Switzerland",
+  "Belgium",
+  "Spain",
+  "Italy",
+  "United Kingdom",
+  "Netherlands",
+];
+
+const defaultTimeSeriesBag = [];
+const today = new Date();
+const lastDate = new Date(today.setDate(today.getDate() - 1));
+const firstDate = new Date(today.setDate(today.getDate() - 30));
+
+const dateParse = function (date) {
+  return (
+    String(date.getFullYear()) +
+    "-" +
+    String(date.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(date.getDate()).padStart(2, "0")
+  );
+};
+
+const initialFirstRunState = {
+  // default user parameters for timeseries search
+  targetCountry: "Belgium",
+  firstDate: dateParse(firstDate),
+  lastDate: dateParse(lastDate),
+  indicator: "biweekly_cases_per_million",
+  method: ["euclidean"],
+  numberOfResults: 20,
+  minPopulation: 600000,
+  startDate: "2021-01-01",
+  endDate: dateParse(lastDate),
+  continentCheck: {
+    Africa: true,
+    Asia: true,
+    Australia: true,
+    Europe: true,
+    "North America": true,
+    "South America": true,
+    Oceania: true,
+  },
+};
+
+const defaultBenchmarkCountries = [
+  // default benchmark countries
+  "France",
+  "Germany",
+  "Switzerland",
+  "Belgium",
+  "Spain",
+  "Italy",
+  "United Kingdom",
+  "Netherlands",
+];
+
+const defaultTimeSeriesBag = [];
+const today = new Date();
+const lastDate = new Date(today.setDate(today.getDate() - 1));
+const firstDate = new Date(today.setDate(today.getDate() - 30));
+
+const dateParse = function (date) {
+  return (
+    String(date.getFullYear()) +
+    "-" +
+    String(date.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(date.getDate()).padStart(2, "0")
+  );
+};
+
+const initialFirstRunState = {
+  // default user parameters for timeseries search
+  targetCountry: "Belgium",
+  firstDate: dateParse(firstDate),
+  lastDate: dateParse(lastDate),
+  indicator: "biweekly_cases_per_million",
+  method: ["euclidean"],
+  numberOfResults: 20,
+  minPopulation: 600000,
+  startDate: "2021-01-01",
+  endDate: dateParse(lastDate),
+  continentCheck: {
+    Africa: true,
+    Asia: true,
+    Australia: true,
+    Europe: true,
+    "North America": true,
+    "South America": true,
+    Oceania: true,
+  },
+};
+
+const defaultBenchmarkCountries = [
+  // default benchmark countries
+  "France",
+  "Germany",
+  "Switzerland",
+  "Belgium",
+  "Spain",
+  "Italy",
+  "United Kingdom",
+  "Netherlands",
+];
+
+const defaultTimeSeriesBag = [];
+
+*/

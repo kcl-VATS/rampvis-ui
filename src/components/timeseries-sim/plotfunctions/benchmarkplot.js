@@ -2,7 +2,54 @@ import * as d3 from "d3";
 export function benchmarkPlot(data) {
   //------ DATA and Graph Functions ------//
 
+  const processVaccine = (arr) => {
+    let new_arr = Array.from(arr);
+    for (let i = 0; i < new_arr.length; i++) {
+      if (new_arr[i] != 0) {
+      } else {
+        let slide = i + 1;
+        while (new_arr[slide] == 0) {
+          slide += 1;
+        }
+        if (slide >= new_arr.length) {
+          new_arr[i] = new_arr[i - 1];
+        } else {
+          new_arr[i] = new_arr[slide];
+        }
+      }
+    }
+
+    return new_arr;
+  };
+
   console.log("benchmarkPlot: data = ", data);
+  const testDataVal = Object.values(
+    data.filter((streams) => streams.key === "people_vaccinated_per_hundred")[0]
+      .value,
+  ).map((pointset) => Object.values(pointset));
+  const testDataDates = Object.values(
+    data.filter((streams) => streams.key === "people_vaccinated_per_hundred")[0]
+      .value,
+  ).map((pointset) => Object.keys(pointset));
+  const processedDataVal = testDataVal.map(processVaccine);
+  const countrylist = Object.keys(
+    data.filter((streams) => streams.key === "people_vaccinated_per_hundred")[0]
+      .value,
+  );
+
+  const zippedData = testDataDates.map((dateArray, i) => {
+    return dateArray.reduce(
+      (obj, k, j) => ({ ...obj, [k]: processedDataVal[i][j] }),
+      {},
+    );
+  });
+
+  const zippedObj = countrylist.reduce(
+    (obj, k, i) => ({ ...obj, [k]: zippedData[i] }),
+    {},
+  );
+
+  data[3].value = zippedObj;
 
   d3.select("#countryCompare").html(""); //clear charts
 
@@ -222,11 +269,8 @@ export function benchmarkPlot(data) {
       const lastDate = graphObj[0].data[graphObj[0].data.length - 1].date;
 
       labelArray.sort((a, b) => (a.end < b.end ? 1 : -1)); // sort array by descending of endpoint
-
-      console.log("array", labelArray);
       const minLabel = yScale(labelArray[labelArray.length - 1].end);
       const maxLabel = yScale(labelArray[0].end);
-      console.log(minLabel, maxLabel);
       const yPoints = labelYPoints(
         height,
         fontSize,
@@ -246,8 +290,6 @@ export function benchmarkPlot(data) {
           yPoints.font,
         ),
       }));
-
-      //console.log(labelData)
 
       d3.select("#graph" + spaceRemove(streams.key))
         .selectAll(".myLabels")
@@ -296,7 +338,6 @@ export function benchmarkPlot(data) {
             .select(this)
             ["_groups"][0][0]["attributes"]["id"]["nodeValue"].split("/");
 
-          console.log(country);
           d3.select("#graph" + stream)
             .selectAll(".multiline")
             .filter(function () {

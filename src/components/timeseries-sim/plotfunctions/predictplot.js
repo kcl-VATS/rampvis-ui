@@ -219,7 +219,6 @@ export function predictPlot(data, country) {
       meanCurveDateMaxes[i],
       queryCurveDateMaxes[i],
       selectedCurveDateMaxes[i],
-      validationCurveDateMaxes[i],
     );
     const maxDate = new Date(maxInt);
     return maxDate;
@@ -230,7 +229,6 @@ export function predictPlot(data, country) {
       meanCurveDateMins[i],
       queryCurveDateMins[i],
       selectedCurveDateMins[i],
-      validationCurveDateMins[i],
     );
     const minDate = new Date(minInt);
     return minDate;
@@ -313,11 +311,6 @@ export function predictPlot(data, country) {
     .append("path")
     .attr("class", "myline")
     .attr("id", (d) => "meanCurve" + spaceRemove(d.key));
-
-  layout
-    .append("path")
-    .attr("class", "myline")
-    .attr("id", (d) => "validationCurve" + spaceRemove(d.key));
 
   keys.map((key, i) => {
     d3.select("#xaxis" + spaceRemove(key)).call(xAxes[i]);
@@ -479,27 +472,6 @@ export function predictPlot(data, country) {
       .attr("stroke", meanColor)
       .attr("d", moveArea(points));
 
-    if (queryValidationCurveData[key] !== "empty") {
-      const validationCurve = Object.entries(queryValidationCurveData[key]).map(
-        (pairs) => {
-          return { date: pairs[0], value: pairs[1] };
-        },
-      );
-
-      d3.select("#validationCurve" + spaceRemove(key))
-        .datum(validationCurve)
-        .attr("fill", "none")
-        .attr("stroke", validationColor)
-        .attr("stroke-width", 8)
-        .attr(
-          "d",
-          d3
-            .line()
-            .x((d) => xScale(parseTime(d.date)))
-            .y((d) => yScale(d.value)),
-        );
-    }
-
     d3.select("#meanCurve" + spaceRemove(key))
       .datum(meanCurve)
       .attr("fill", "none")
@@ -537,5 +509,33 @@ export function predictPlot(data, country) {
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .text(key + " Prediction for " + country);
+
+    if (queryValidationCurveData[key] !== "empty") {
+      let validationCurve = Object.entries(queryValidationCurveData[key]).map(
+        (pairs) => {
+          return { date: pairs[0], value: pairs[1] };
+        },
+      );
+
+      validationCurve = validationCurve.slice(1, queryCurve.length / 2 + 1);
+
+      d3.select("#graph" + spaceRemove(key))
+        .append("path")
+        .attr("class", "myline")
+        .attr("id", (d) => "validationCurve" + spaceRemove(d.key));
+
+      d3.select("#validationCurve" + spaceRemove(key))
+        .datum(validationCurve)
+        .attr("fill", "none")
+        .attr("stroke", validationColor)
+        .attr("stroke-width", 8)
+        .attr(
+          "d",
+          d3
+            .line()
+            .x((d) => xScale(parseTime(d.date)))
+            .y((d) => yScale(d.value)),
+        );
+    }
   });
 }
