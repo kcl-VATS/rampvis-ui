@@ -3,14 +3,35 @@ import { Helmet } from "react-helmet-async";
 import { Grid, Box, Card, CardContent, Button } from "@mui/material";
 import DashboardLayout from "src/components/dashboard-layout/DashboardLayout";
 import axios from "axios";
-import { heatmapVats } from "src/components/timeseries-sim/plotfunctions/heatmap";
-import { manhattanVats } from "src/components/timeseries-sim/plotfunctions/manhattan";
+import { useEffect } from "react";
+import Graph from "graphology";
+import { SigmaContainer, useLoadGraph } from "react-sigma-v2";
+import "react-sigma-v2/lib/react-sigma-v2.css";
+
 const API = process.env.NEXT_PUBLIC_API_PY;
 
 const API_PY = API + "/timeseries-sim-search";
 
 const TimeseriesSim = () => {
   //const { settings } = useSettings();
+
+  const LoadGraph = () => {
+    const loadGraph = useLoadGraph();
+
+    useEffect(() => {
+      const graph = new Graph();
+      graph.addNode("first", {
+        x: 0,
+        y: 0,
+        size: 15,
+        label: "My first node",
+        color: "#FA4F40",
+      });
+      loadGraph(graph);
+    }, [loadGraph]);
+
+    return null;
+  };
 
   const sankeyDataClick = async () => {
     await sankeyPost();
@@ -44,14 +65,9 @@ const TimeseriesSim = () => {
           </Card>
           <Card>
             <h2>
-              <Button
-                size="large"
-                variant="contained"
-                color="primary"
-                onClick={sankeyDataClick}
-              >
-                Get manhattan data
-              </Button>
+              <SigmaContainer style={{ height: "500px", width: "100%" }}>
+                <LoadGraph />
+              </SigmaContainer>
             </h2>
           </Card>
           <Card>
