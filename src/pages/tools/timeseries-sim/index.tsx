@@ -1,16 +1,6 @@
 import { useState, ReactElement } from "react";
 import { Helmet } from "react-helmet-async";
-import {
-  Grid,
-  Box,
-  Card,
-  CardContent,
-  Button,
-  TextField,
-  List,
-  ListItem,
-  ListItemText,
-} from "@mui/material";
+import { Grid, Box, Card, CardContent, Button, TextField } from "@mui/material";
 import DashboardLayout from "src/components/dashboard-layout/DashboardLayout";
 import axios from "axios";
 import { useEffect } from "react";
@@ -22,38 +12,51 @@ const defaultFileState = {
   selectedFile: null,
 };
 
-const API = process.env.NEXT_PUBLIC_API_PY;
-
-const API_PY = API + "/timeseries-sim-search";
-
 const TimeseriesSim = () => {
   const [fileToUpload, setFileToUpload] = useState(defaultFileState);
+  const [filesOnServer, setFilesOnServer] = useState([]);
 
-  const onFileChange = (event) => {
-    console.log(event);
-    setFileToUpload({ selectedFile: event.target.files[0] });
-  };
+  useEffect(() => {
+    const initialLoad = async () => {
+      const response = await getFileList();
+      console.log("doing stuff");
+      setFilesOnServer(response.data);
+    };
+    initialLoad();
+  }, []);
 
-  const onFileUpload = async () => {
+  const uploadFile = async () => {
     const formData = new FormData();
-    console.log(fileToUpload);
     formData.append(
       "file",
       fileToUpload.selectedFile,
       fileToUpload.selectedFile.name,
     );
-
     const apiUrl = "http://127.0.0.1:8000" + "/data/upload";
-
     const response = await axios.post(apiUrl, formData);
-    console.log("response = ", response);
-    if (response.data) {
-      console.log("response.data = ", response.data);
-    }
+    return response;
   };
 
-  const checkData = () => {
-    console.log(fileToUpload);
+  const getFileList = async () => {
+    const apiUrl = "http://127.0.0.1:8000" + "/data/check";
+    const response = await axios.get(apiUrl);
+    return response;
+  };
+
+  const onFileChange = (event) => {
+    setFileToUpload({ selectedFile: event.target.files[0] });
+  };
+
+  const onFileUpload = async () => {
+    const fileUploadResponse = await uploadFile();
+    console.log("fileUploadResponse = ", fileUploadResponse.data);
+
+    const fileListFromServerResponse = await getFileList();
+    setFilesOnServer(fileListFromServerResponse.data);
+    console.log(
+      "fileListFromServerResponse = ",
+      fileListFromServerResponse.data,
+    );
   };
 
   const LoadGraph = () => {
@@ -73,18 +76,8 @@ const TimeseriesSim = () => {
     return null;
   };
 
-  const sankeyPost = async () => {
-    const apiUrl =
-      "http://0.0.0.0:4010" + "/stat/v1/timeseries-sim-search/sankey_generate/";
-
-    const predictObj = {
-      dummy: 10,
-    };
-    const response = await axios.post(apiUrl, predictObj);
-    console.log("response = ", response);
-    if (response.data) {
-      console.log("response.data = ", response.data);
-    }
+  const CheckList = () => {
+    console.log(filesOnServer);
   };
 
   return (
@@ -96,30 +89,28 @@ const TimeseriesSim = () => {
         <Grid>
           <Card>
             <CardContent>
-              <h2> File handling </h2>
+              <h2> Upload,access data </h2>
 
               <TextField type="file" onChange={onFileChange} />
               <h2>
-                <Button onClick={onFileUpload} variant="outlined">
+                <Button
+                  disabled={!fileToUpload.selectedFile}
+                  onClick={onFileUpload}
+                  variant="outlined"
+                >
                   Submit data
                 </Button>
               </h2>
-
               <h2>
-                <Button onClick={checkData} variant="outlined">
-                  Check file
+                <Button onClick={CheckList} variant="outlined">
+                  Check List
                 </Button>
               </h2>
-
-              <Grid>
-                <List dense={true}>
-                  <ListItem>
-                    <ListItemText primary="Single-line item" />
-                  </ListItem>
-                  ,
-                </List>
-              </Grid>
             </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent>Load Network</CardContent>
           </Card>
 
           <Card>
