@@ -45,6 +45,7 @@
     "formik": "^2.2.9",
     "geojson": "^0.5.0",
     "graphology": "^0.24.1",
+    "graphology-layout": "^0.6.0",
     "graphology-layout-forceatlas2": "^0.9.2",
     "graphology-types": "^0.24.4",
     "h5wasm": "^0.1.8",

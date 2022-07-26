@@ -3,8 +3,9 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { SigmaContainer, useLoadGraph } from "react-sigma-v2";
 import Graph from "graphology";
+import forceAtlas2 from "graphology-layout-forceatlas2";
 import "react-sigma-v2/lib/react-sigma-v2.css";
-
+import circular from "graphology-layout/circular";
 const defaultCpg = "cg27012446";
 
 function SubgraphCpg(props) {
@@ -35,7 +36,9 @@ function SubgraphCpg(props) {
     useEffect(() => {
       const graph = new Graph();
       graph.import(graphObj);
-      //loadGraph(graph);
+      circular.assign(graph);
+      forceAtlas2.assign(graph, { iterations: 50 });
+      loadGraph(graph);
       console.log(graph.hasNode("cg27012446"));
     }, [graphObj]);
 
