@@ -5,12 +5,12 @@ import DashboardLayout from "src/components/dashboard-layout/DashboardLayout";
 import axios from "axios";
 import { useEffect } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
-import NetworkDataBlock from "src/components/networkVis/networkDataBlock";
+import NetworkDataBlock from "src/components/networkVis/NetworkDataBlock";
 import NetworkLoadBlock from "src/components/networkVis/NetworkLoadBlock";
 import SubgraphCpg from "src/components/networkVis/SubgraphCpg";
 
 const defaultServerListState = {
-  fileList: [],
+  fileList: ["default"],
 };
 
 const TimeseriesSim = () => {

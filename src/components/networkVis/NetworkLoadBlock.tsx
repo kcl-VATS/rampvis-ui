@@ -57,6 +57,7 @@ function NetworkLoadBlock(props) {
               label="Files on server"
               variant="outlined"
               name="indicator"
+              value={fileToNetwork}
               onChange={onNetworkChange}
             >
               {props.fileList["fileList"].map((option) => (

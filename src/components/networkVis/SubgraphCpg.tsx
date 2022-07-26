@@ -5,37 +5,15 @@ import { SigmaContainer, useLoadGraph } from "react-sigma-v2";
 import Graph from "graphology";
 import "react-sigma-v2/lib/react-sigma-v2.css";
 
-const cpgList = [
-  "cg16423305",
-  "cg00128506",
-  "cg25014118",
-  "cg13212186",
-  "cg00020172",
-  "cg26858414",
-  "cg19034770",
-  "cg17096289",
-  "cg12182649",
-  "cg16553272",
-  "cg14704780",
-  "cg20636526",
-  "cg19675496",
-  "cg18111489",
-  "cg05545351",
-  "cg20802826",
-  "cg13808979",
-  "cg16958594",
-  "cg22110654",
-  "cg27258561",
-];
-
-const defaultCpg = "cg27258561";
+const defaultCpg = "cg27012446";
 
 function SubgraphCpg(props) {
   const [targetCpg, setTargetCpg] = useState(defaultCpg);
-
+  const [graphObj, setGraphObj] = useState({});
   // get subgraph click
   const onGetSubgraph = async () => {
     const subGraphResponse = await getSubgraph();
+    setGraphObj(subGraphResponse.data);
     console.log(subGraphResponse);
   };
   // get request to get nodes and edges of network given cpg
@@ -56,20 +34,10 @@ function SubgraphCpg(props) {
     const loadGraph = useLoadGraph();
     useEffect(() => {
       const graph = new Graph();
-      graph.addNode("first", {
-        x: 0,
-        y: 0,
-        size: 15,
-        color: "#FA4F40",
-      });
-      graph.addNode("second", {
-        x: 5,
-        y: 5,
-        size: 15,
-        color: "black",
-      });
-      loadGraph(graph);
-    }, [loadGraph]);
+      graph.import(graphObj);
+      //loadGraph(graph);
+      console.log(graph.hasNode("cg27012446"));
+    }, [graphObj]);
 
     return null;
   };
