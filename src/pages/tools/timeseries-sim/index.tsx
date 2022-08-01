@@ -4,10 +4,10 @@ import { Grid, Box, Dialog, DialogContent } from "@mui/material";
 import DashboardLayout from "src/components/dashboard-layout/DashboardLayout";
 import axios from "axios";
 import { useEffect } from "react";
-import CircularProgress from "@mui/material/CircularProgress";
 import NetworkDataBlock from "src/components/networkVis/NetworkDataBlock";
 import NetworkLoadBlock from "src/components/networkVis/NetworkLoadBlock";
 import SubgraphCpg from "src/components/networkVis/SubgraphCpg";
+import LoadingPopUp from "src/components/networkVis/misc/LoadingPopUp";
 
 const defaultServerListState = {
   fileList: ["default"],
@@ -30,7 +30,7 @@ const TimeseriesSim = () => {
     setRequestLoadPopup(false);
   };
 
-  // on page-load, get available files on the server
+  // on page-load, get available files on the server, check network status etc..
   useEffect(() => {
     const initialLoad = async () => {
       // get request to get file list
@@ -76,13 +76,7 @@ const TimeseriesSim = () => {
           />
         </Grid>
       </Box>
-      <Dialog open={requestLoadPopup}>
-        <DialogContent>
-          <Box sx={{ display: "flex" }}>
-            <CircularProgress />
-          </Box>
-        </DialogContent>
-      </Dialog>
+      <LoadingPopUp state={requestLoadPopup}></LoadingPopUp>
     </>
   );
 };
