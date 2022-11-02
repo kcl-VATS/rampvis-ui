@@ -21,7 +21,7 @@ function NetworkDataBlock(props) {
       fileToUpload.selectedFile.name,
     );
     // post endpoint to upload data
-    const apiUrl = "http://127.0.0.1:8000" + "/data/upload";
+    const apiUrl = "http://127.0.0.1:4010" + "/data/upload";
     const response = await axios.post(apiUrl, formData);
     return response;
   };
@@ -48,21 +48,19 @@ function NetworkDataBlock(props) {
 
   return (
     <div>
-      <Card>
+      <Card sx={{ width: 400 }}>
         <CardContent>
-          Upload,access data
+          Upload meQTL data
           <h2>
             <TextField type="file" onChange={onFileChange} />
           </h2>
-          <h2>
-            <Button
-              disabled={!fileToUpload.selectedFile}
-              onClick={onFileUpload}
-              variant="outlined"
-            >
-              Upload data
-            </Button>
-          </h2>
+          <Button
+            disabled={!fileToUpload.selectedFile}
+            onClick={onFileUpload}
+            variant="outlined"
+          >
+            Upload
+          </Button>
         </CardContent>
       </Card>
     </div>
