@@ -1,4 +1,3 @@
-import { CheckBox, TransgenderTwoTone } from "@mui/icons-material";
 import {
   Typography,
   Box,
@@ -14,7 +13,6 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
-import Graph from "graphology";
 
 const getCols = (row: {}) =>
   Object.keys(row).map((key) => {
@@ -24,7 +22,6 @@ const getCols = (row: {}) =>
 const cisTransOpts = ["cis-only", "trans-only", "cis/trans", "all"];
 
 function NetworkLoadBlock(props) {
-  const [fileToNetwork, setFileToNetwork] = useState("");
   const [filterPopup, setFilterPopup] = useState(false);
   const [distanceFilter, setDistanceFilter] = useState(5000000);
   const [minAssociation, setMinAssociation] = useState(3);
@@ -35,12 +32,10 @@ function NetworkLoadBlock(props) {
   const handleMinUniqueChr = (event) => setMinUniqueChr(event.target.value);
   const handleFilterButton = () => setFilterPopup((value) => !value);
 
-  const graph = new Graph();
-
   // checks if the network is loaded
   // handler to file selection to load to network
   const onNetworkChange = (event) => {
-    setFileToNetwork(event.target.value);
+    props.setFile(event.target.value);
   };
 
   // load network click
@@ -54,7 +49,7 @@ function NetworkLoadBlock(props) {
     props.popupOpen();
     const dataParams = {
       params: {
-        file: fileToNetwork,
+        file: props.file,
         minDistance: distanceFilter,
         minAssoc: minAssociation,
         minChrom: minUniqueChr,
@@ -63,41 +58,16 @@ function NetworkLoadBlock(props) {
     const dataUrl = "http://127.0.0.1:4010" + "/network/process";
     const dataResponse = await axios.get(dataUrl, dataParams);
 
-    const cpgParams = {
-      params: { file: fileToNetwork, targetCpg: "cg06097659" },
-    };
-
-    const cpgUrl = "http://127.0.0.1:4010" + "/network/subgraph";
-    const cpgResponse = await axios.get(cpgUrl, cpgParams);
-
-    console.log("Cpg Response", cpgResponse);
-    props.setNetwork(true);
-
     props.popupClose();
     props.setCpgData({
       cols: getCols(dataResponse.data[0]),
       rows: dataResponse.data,
     });
-
-    /*
-    let cpgSet = new Set()
-    let snpSet = new Set()
-    let edges = []
-
-    data_response.data.map((data)=>{
-      cpgSet.add(data['CpG'])
-      snpSet.add(data['Top SNP'])
-      edges.push({'source':data['CpG'],'target':data['Top SNP']})
-    })
-    */
-
-    //props.setGraphObj(network_response.data)
   };
 
   // empty network click
   const onEmptyNetwork = async () => {
     const emptyNetworkResponse = await emptyNetwork();
-    console.log(emptyNetworkResponse);
   };
 
   // get request to empty network model
@@ -136,7 +106,7 @@ function NetworkLoadBlock(props) {
               label="Available meQTL files"
               variant="outlined"
               name="indicator"
-              value={fileToNetwork}
+              value={props.file}
               onChange={onNetworkChange}
               sx={{ width: 300 }}
             >
@@ -148,7 +118,7 @@ function NetworkLoadBlock(props) {
             </TextField>
 
             <Button
-              disabled={!fileToNetwork}
+              disabled={!props.file}
               onClick={onLoadNetwork}
               variant="outlined"
             >

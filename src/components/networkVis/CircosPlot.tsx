@@ -39,32 +39,57 @@ function CircosArea(props) {
     const chordData = props.data.rows.map(function (d) {
       return {
         source: {
-          id: `chr${d["CpG chr"]}`,
-          start: parseInt(d["CpG pos"]) - 3000000,
-          end: parseInt(d["CpG pos"]) + 3000000,
+          id: `chr${d["cpg_chr"]}`,
+          start: parseInt(d["cpg_pos"]) - 3000000,
+          end: parseInt(d["cpg_pos"]) + 3000000,
         },
         target: {
-          id: `chr${d["SNP chr_x"]}`,
-          start: parseInt(d["SNP pos"]) - 3000000,
-          end: parseInt(d["SNP pos"]) + 3000000,
+          id: `chr${d["snp_chr"]}`,
+          start: parseInt(d["snp_pos"]) - 3000000,
+          end: parseInt(d["snp_pos"]) + 3000000,
         },
         cpgData: {
-          id: d["CpG"],
+          id: d["cpg"],
         },
         betaValue: {
-          value: d["Beta"],
+          value: d["beta"],
         },
       };
     });
 
-    const scatterData = props.data.rows.map(function (d) {
+    let cpgScatterData = props.data.rows.map(function (d) {
       return {
-        cpgData: d["CpG"],
-        block_id: `chr${d["CpG chr"]}`,
-        position: d["CpG pos"],
-        value: d["Beta"],
+        cpgData: d["cpg"],
+        block_id: `chr${d["cpg_chr"]}`,
+        position: d["cpg_pos"],
+        value: d["pval"],
       };
     });
+
+    // https://stackoverflow.com/questions/2218999/how-to-remove-all-duplicates-from-an-array-of-objects
+    cpgScatterData = cpgScatterData.filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.cpgData === value.cpgData),
+    );
+
+    let snpScatterData = props.data.rows.map(function (d) {
+      return {
+        snpData: d["snp"],
+        block_id: `chr${d["snp_chr"]}`,
+        position: d["snp_pos"],
+        value: d["pval"],
+      };
+    });
+
+    cpgScatterData = cpgScatterData.filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.cpgData === value.cpgData),
+    );
+
+    snpScatterData = snpScatterData.filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.snpData === value.snpData),
+    );
 
     const circosExample = Circos(defaultConf);
 
@@ -89,23 +114,28 @@ function CircosArea(props) {
         },
       })
       .chords("c1", chordData, { opacity: 0.5, logScale: false, radius: 0.75 })
-      .scatter("s1", scatterData, {
-        innerRadius: 0.8,
+      .scatter("s1", cpgScatterData, {
+        innerRadius: 0.95,
         outerRadius: 0.95,
-        strokeColor: "grey",
         strokeWidth: 1,
         shape: "circle",
-        size: 14,
-        min: -1,
-        max: 1,
+        size: 20,
+        min: 0,
+        max: 0.1,
         color: function (d) {
-          if (d.value > 0) {
-            return "#4caf50";
-          }
-          if (d.value < 0) {
-            return "#f44336";
-          }
-          return "#d3d3d3";
+          return "#ff6400";
+        },
+      })
+      .scatter("s2", snpScatterData, {
+        innerRadius: 0.85,
+        outerRadius: 0.85,
+        strokeWidth: 1,
+        shape: "circle",
+        size: 20,
+        min: 0,
+        max: 0.1,
+        color: function (d) {
+          return "#009cff";
         },
       })
       .render();
