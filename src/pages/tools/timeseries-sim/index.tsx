@@ -133,6 +133,7 @@ const TimeseriesSim = () => {
                     autoHeight
                     pageSize={10}
                     components={{ Toolbar: GridToolbar }}
+                    checkboxSelection
                   />
                 </Card>
               </Grid>

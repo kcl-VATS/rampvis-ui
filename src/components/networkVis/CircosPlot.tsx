@@ -51,6 +51,9 @@ function CircosArea(props) {
         cpgData: {
           id: d["cpg"],
         },
+        snpData: {
+          id: "snp" + d["snp"].replace(":", "_"),
+        },
         betaValue: {
           value: d["beta"],
         },
@@ -59,7 +62,7 @@ function CircosArea(props) {
 
     let cpgScatterData = props.data.rows.map(function (d) {
       return {
-        cpgData: d["cpg"],
+        id: d["cpg"],
         block_id: `chr${d["cpg_chr"]}`,
         position: d["cpg_pos"],
         value: d["pval"],
@@ -69,26 +72,21 @@ function CircosArea(props) {
     // https://stackoverflow.com/questions/2218999/how-to-remove-all-duplicates-from-an-array-of-objects
     cpgScatterData = cpgScatterData.filter(
       (value, index, self) =>
-        index === self.findIndex((t) => t.cpgData === value.cpgData),
+        index === self.findIndex((t) => t.id === value.id),
     );
 
     let snpScatterData = props.data.rows.map(function (d) {
       return {
-        snpData: d["snp"],
+        id: "snp" + d["snp"].replace(":", "_"),
         block_id: `chr${d["snp_chr"]}`,
         position: d["snp_pos"],
         value: d["pval"],
       };
     });
 
-    cpgScatterData = cpgScatterData.filter(
-      (value, index, self) =>
-        index === self.findIndex((t) => t.cpgData === value.cpgData),
-    );
-
     snpScatterData = snpScatterData.filter(
       (value, index, self) =>
-        index === self.findIndex((t) => t.snpData === value.snpData),
+        index === self.findIndex((t) => t.id === value.id),
     );
 
     const circosExample = Circos(defaultConf);
@@ -119,7 +117,7 @@ function CircosArea(props) {
         outerRadius: 0.95,
         strokeWidth: 1,
         shape: "circle",
-        size: 20,
+        size: 50,
         min: 0,
         max: 0.1,
         color: function (d) {
@@ -131,7 +129,7 @@ function CircosArea(props) {
         outerRadius: 0.85,
         strokeWidth: 1,
         shape: "circle",
-        size: 20,
+        size: 50,
         min: 0,
         max: 0.1,
         color: function (d) {

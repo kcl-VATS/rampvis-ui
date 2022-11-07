@@ -13,6 +13,9 @@ import {
   symbolWye,
 } from "d3-shape";
 
+import * as d3 from "d3";
+import { F } from "lodash/fp";
+
 const defaultConf = assign(
   {
     direction: {
@@ -93,7 +96,7 @@ export default class Scatter extends Track {
       .append("path")
       .attr("class", "point")
       .attr("opacity", conf.opacity)
-      .attr("id", (d) => d.cpgData)
+      .attr("id", (d) => d.id)
       .attr("d", (d, i, j) => d.symbol(d, i, j))
       .attr("transform", (d) => {
         return `
@@ -109,7 +112,32 @@ export default class Scatter extends Track {
       })
       .attr("stroke", conf.strokeColor)
       .attr("stroke-width", conf.strokeWidth)
-      .attr("fill", "none");
+      .attr("fill", "none")
+      .on("mouseover", (d) => {
+        const id = d.id;
+
+        const assoc_points = d3
+          .selectAll(".chord")
+          .filter((d) => [d.cpgData.id, d.snpData.id].includes(id))
+          .data();
+
+        const cpg_ids = assoc_points.map((d) => d.cpgData.id);
+        const snp_ids = assoc_points.map((d) => d.snpData.id);
+        const valid_points = cpg_ids.concat(snp_ids);
+
+        d3.selectAll(".chord")
+          .filter((d) => ![d.cpgData.id, d.snpData.id].includes(id))
+          .style("visibility", "hidden");
+
+        d3.selectAll(".point")
+          .filter((d) => !valid_points.includes(d.id))
+          .style("visibility", "hidden");
+      })
+
+      .on("mouseout", (d) => {
+        d3.selectAll(".chord").style("visibility", "visible");
+        d3.selectAll(".point").style("visibility", "visible");
+      });
 
     if (conf.fill) {
       point.attr("fill", conf.colorValue);

@@ -4,6 +4,7 @@ import * as d3 from "d3";
 import assign from "lodash/assign";
 import isFunction from "lodash/isFunction";
 import { common, values } from "../configs";
+import { CollectionsBookmarkRounded } from "@mui/icons-material";
 
 const defaultConf = assign(
   {
@@ -72,7 +73,7 @@ export default class Chords extends Track {
       .append("path")
       .attr("class", "chord")
       .attr("fill", (d) => betaColor(d.betaValue.value))
-      .attr("id", (d) => d.cpgData.id)
+      .attr("id", (d) => d.cpgData.id + "-" + d.snpData.id)
       .attr(
         "d",
         d3
@@ -86,12 +87,18 @@ export default class Chords extends Track {
       )
       .attr("opacity", conf.opacity)
       .on("mouseover", (d) => {
-        const selected_id = d3.selectAll("#" + d.cpgData.id).attr("id");
+        const selected_id_cpg = d3.selectAll("#" + d.cpgData.id).attr("id");
+        const selected_id_snp = d3.selectAll("#" + d.snpData.id).attr("id");
+
         d3.selectAll(".chord")
-          .filter((d) => d.cpgData.id != selected_id)
+          .filter(
+            (d) =>
+              d.cpgData.id + "-" + d.snpData.id !=
+              selected_id_cpg + "-" + selected_id_snp,
+          )
           .style("visibility", "hidden");
         d3.selectAll(".point")
-          .filter((d) => d.cpgData != selected_id)
+          .filter((d) => ![selected_id_snp, selected_id_cpg].includes(d.id))
           .style("visibility", "hidden");
       })
       .on("mouseout", (d) => {
