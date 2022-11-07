@@ -6,11 +6,14 @@ import { useEffect } from "react";
 import NetworkDataBlock from "src/components/networkVis/NetworkDataBlock";
 import NetworkLoadBlock from "src/components/networkVis/NetworkLoadBlock";
 import LoadingPopUp from "src/components/networkVis/LoadingPopUp";
-import { DataGrid, GridToolbar, GridEventListener } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridToolbar,
+  GridEventListener,
+  gridColumnsTotalWidthSelector,
+} from "@mui/x-data-grid";
 import CircosArea from "src/components/networkVis/CircosPlot";
 import EwasPopUp from "src/components/networkVis/EwasPopUp";
-import { data } from "jquery";
-import { Field } from "formik";
 
 const defaultServerListState = {
   fileList: ["default"],
@@ -22,6 +25,13 @@ const getFileList = async () => {
   const response = await axios.get(apiUrl);
   return response;
 };
+
+const getCols = (row: {}) =>
+  Object.keys(row).map((key) => {
+    return { field: key, headerName: key, width: 100 };
+  });
+
+const localApi = "http://127.0.0.1:4010";
 
 const TimeseriesSim = () => {
   // state functions to manage file uploading to the back-end and checking
@@ -36,36 +46,13 @@ const TimeseriesSim = () => {
 
   const [cpgData, setCpgData] = useState({ cols: [], rows: [] });
 
-  const [cpgPopUp, setCpgPopUp] = useState(false);
+  const [assocPopUp, setAssocPopUp] = useState(false);
 
   const [ewasResult, setEwasResult] = useState({ cols: [], rows: [] });
 
-  const handleRowClick: GridEventListener<"rowClick"> = async (
-    params, // GridRowParams
-  ) => {
-    const ewasUrl = "http://127.0.0.1:4010" + "/network/ewas";
-    const cpgUrl = "http://127.0.0.1:4010" + "/network/subgraph";
+  const [subgraphResult, setSubgraphResult] = useState({ cols: [], rows: [] });
 
-    const ewasQuery = params.row.CpG;
-
-    const cpgData = await axios.get(ewasUrl, { params: { cpg: ewasQuery } });
-
-    const cpgResponse = await axios.get(cpgUrl, {
-      params: { file: fileToNetwork, targetCpg: ewasQuery },
-    });
-    const fields = cpgData.data.fields;
-    const cols = cpgData.data.fields.map((cols) => ({
-      field: cols,
-      headerName: cols,
-      width: 100,
-    }));
-    let rows = cpgData.data.results.map((values) =>
-      Object.fromEntries(fields.map((k, i) => [k, values[i]])),
-    );
-    rows = rows.map((data, i) => ({ ...data, id: i }));
-
-    setEwasResult({ cols: cols, rows: rows });
-  };
+  const [godmcResult, setGodmcResult] = useState({ cols: [], rows: [] });
 
   // open loading circle
   const popUpOpen = () => {
@@ -76,12 +63,61 @@ const TimeseriesSim = () => {
     setRequestLoadPopup(false);
   };
 
-  const cpgPopUpOpen = () => {
-    setCpgPopUp(true);
+  const assocPopUpOpen = () => {
+    setAssocPopUp(true);
   };
   // close loading circle
-  const cpgPopUpClose = () => {
-    setCpgPopUp(false);
+  const assocPopUpClose = () => {
+    setAssocPopUp(false);
+  };
+
+  const handleRowClick: GridEventListener<"rowClick"> = async (
+    params, // GridRowParams
+  ) => {
+    const ewasUrl = localApi + "/network/ewas";
+
+    const ewasQuery = params.row.cpg;
+
+    popUpOpen();
+
+    const response = await axios.get(ewasUrl, {
+      params: { cpg: ewasQuery, file: fileToNetwork, targetCpg: ewasQuery },
+    });
+    console.log(response);
+    const ewasResponse = response.data.ewas;
+    const ewasFields = ewasResponse.fields;
+    const ewasCols = ewasResponse.fields.map((cols) => ({
+      field: cols,
+      headerName: cols,
+      width: 100,
+    }));
+
+    let ewasRows = ewasResponse.results.map((values) =>
+      Object.fromEntries(ewasFields.map((k, i) => [k, values[i]])),
+    );
+
+    ewasRows = ewasRows.map((data, i) => ({ ...data, id: i }));
+
+    const subgraphResponse = response.data.subgraph;
+
+    let godmcResponse = response.data.godmc;
+
+    godmcResponse = godmcResponse.map((data, i) => ({ ...data, id: i }));
+
+    popUpClose();
+
+    setEwasResult({ cols: ewasCols, rows: ewasRows });
+    setSubgraphResult({
+      cols: getCols(subgraphResponse[0]),
+      rows: subgraphResponse,
+    });
+
+    setGodmcResult({
+      cols: getCols(godmcResponse[0]),
+      rows: godmcResponse,
+    });
+
+    assocPopUpOpen();
   };
 
   // on page-load, get available files on the server, check network status etc..
@@ -145,28 +181,16 @@ const TimeseriesSim = () => {
               <CircosArea data={cpgData} />
             </Grid>
           </Grid>
-
-          <Grid>
-            {ewasResult.rows?.length ? (
-              <Grid item xs={12} sx={{ width: 800, height: 800 }}>
-                <Card sx={{ width: 800 }}>
-                  <DataGrid
-                    rows={ewasResult.rows}
-                    columns={ewasResult.cols}
-                    autoHeight
-                    pageSize={10}
-                    components={{ Toolbar: GridToolbar }}
-                  />
-                </Card>
-              </Grid>
-            ) : (
-              <div> No result from E</div>
-            )}
-          </Grid>
         </Grid>
       </Box>
-
-      <LoadingPopUp state={requestLoadPopup}></LoadingPopUp>
+      <EwasPopUp
+        ewasData={ewasResult}
+        subgraphData={subgraphResult}
+        godmcData={godmcResult}
+        close={assocPopUpClose}
+        state={assocPopUp}
+      />
+      <LoadingPopUp state={requestLoadPopup} />
     </>
   );
 };
