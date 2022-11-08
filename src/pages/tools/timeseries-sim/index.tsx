@@ -27,7 +27,7 @@ const getFileList = async () => {
   return response;
 };
 
-const getCols = (row: {}) =>
+const getCols = (row) =>
   Object.keys(row).map((key) => {
     return { field: key, headerName: key, width: 100 };
   });

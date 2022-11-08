@@ -14,7 +14,7 @@ import {
 import axios from "axios";
 import { useState } from "react";
 
-const getCols = (row: {}) =>
+const getCols = (row) =>
   Object.keys(row).map((key) => {
     return { field: key, headerName: key, width: 100 };
   });
@@ -69,7 +69,7 @@ function NetworkLoadBlock(props) {
 
   const createMarks = (min, max, scale = 1) => {
     const step = (max - min) / 10;
-    let marks_arr = [];
+    const marks_arr = [];
 
     for (let i = min; i <= max; i += step) {
       marks_arr.push({
