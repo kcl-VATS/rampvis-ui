@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Grid, Card, Box, Dialog, DialogContent, Button } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import SubgraphCpg from "./SubgraphCpg";
 
 function EwasPopUp(props) {
   return (
@@ -23,7 +25,7 @@ function EwasPopUp(props) {
           )}
 
           {props.subgraphData.rows?.length ? (
-            <Grid item xs={12} sx={{ width: 800, height: 800 }}>
+            <Grid item xs={12} sx={{ width: 800 }}>
               <Card sx={{ width: 800 }}>
                 <DataGrid
                   rows={props.subgraphData.rows}
@@ -39,7 +41,7 @@ function EwasPopUp(props) {
           )}
 
           {props.godmcData.rows?.length ? (
-            <Grid item xs={12} sx={{ width: 800, height: 800 }}>
+            <Grid item xs={12} sx={{ width: 800 }}>
               <Card sx={{ width: 800 }}>
                 <DataGrid
                   rows={props.godmcData.rows}
@@ -53,6 +55,8 @@ function EwasPopUp(props) {
           ) : (
             <div> No result </div>
           )}
+
+          <SubgraphCpg graphObj={props.subgraphData}></SubgraphCpg>
 
           <Button onClick={props.close}>Close</Button>
         </Box>

@@ -10,10 +10,11 @@ import {
   DataGrid,
   GridToolbar,
   GridEventListener,
-  gridColumnsTotalWidthSelector,
+  GridSelectionModel,
 } from "@mui/x-data-grid";
 import CircosArea from "src/components/networkVis/CircosPlot";
 import EwasPopUp from "src/components/networkVis/EwasPopUp";
+import InfoPopUp from "src/components/timeseries-sim/InfoPopUp";
 
 const defaultServerListState = {
   fileList: ["default"],
@@ -40,7 +41,7 @@ const TimeseriesSim = () => {
   // state for list of files in the server
   const [filesOnServer, setFilesOnServer] = useState(defaultServerListState);
   // file to be transformed to network format
-  const [forceDirectedObj, setForceDirectedObj] = useState({});
+  const [circosData, setCircosData] = useState({ cols: [], rows: [] });
 
   const [fileToNetwork, setFileToNetwork] = useState("");
 
@@ -53,6 +54,8 @@ const TimeseriesSim = () => {
   const [subgraphResult, setSubgraphResult] = useState({ cols: [], rows: [] });
 
   const [godmcResult, setGodmcResult] = useState({ cols: [], rows: [] });
+
+  const [checkboxCpg, setCheckboxCpg] = useState<GridSelectionModel>([]);
 
   // open loading circle
   const popUpOpen = () => {
@@ -102,8 +105,6 @@ const TimeseriesSim = () => {
 
     let godmcResponse = response.data.godmc;
 
-    godmcResponse = godmcResponse.map((data, i) => ({ ...data, id: i }));
-
     popUpClose();
 
     setEwasResult({ cols: ewasCols, rows: ewasRows });
@@ -112,10 +113,13 @@ const TimeseriesSim = () => {
       rows: subgraphResponse,
     });
 
-    setGodmcResult({
-      cols: getCols(godmcResponse[0]),
-      rows: godmcResponse,
-    });
+    if (typeof godmcResponse !== "string") {
+      godmcResponse = godmcResponse.map((data, i) => ({ ...data, id: i }));
+      setGodmcResult({
+        cols: getCols(godmcResponse[0]),
+        rows: godmcResponse,
+      });
+    }
 
     assocPopUpOpen();
   };
@@ -155,8 +159,7 @@ const TimeseriesSim = () => {
                 file={fileToNetwork}
                 setFile={setFileToNetwork}
                 setCpgData={setCpgData}
-                graphObj={forceDirectedObj}
-                setGraphObj={setForceDirectedObj}
+                setCircosData={setCircosData}
               />
             </Grid>
             {cpgData.rows?.length ? (
@@ -168,8 +171,36 @@ const TimeseriesSim = () => {
                     onRowClick={handleRowClick}
                     autoHeight
                     pageSize={10}
+                    componentsProps={{
+                      toolbar: {
+                        showQuickFilter: true,
+                        quickFilterProps: { debounceMs: 500 },
+                      },
+                    }}
                     components={{ Toolbar: GridToolbar }}
                     checkboxSelection
+                    onSelectionModelChange={(select) => {
+                      console.log(select);
+
+                      if (select.length === 0) {
+                        console.log("logic works");
+                        setCircosData(cpgData);
+                      } else {
+                        const selectedCpgRows = cpgData.rows.filter((row) =>
+                          select.includes(row.id),
+                        );
+
+                        const newDataObj = {
+                          cols: circosData.cols,
+                          rows: selectedCpgRows,
+                        };
+
+                        setCircosData(newDataObj);
+                      }
+
+                      setCheckboxCpg(select);
+                    }}
+                    selectionModel={checkboxCpg}
                   />
                 </Card>
               </Grid>
@@ -178,7 +209,7 @@ const TimeseriesSim = () => {
             )}
 
             <Grid item xs={12}>
-              <CircosArea data={cpgData} />
+              <CircosArea data={circosData} />
             </Grid>
           </Grid>
         </Grid>

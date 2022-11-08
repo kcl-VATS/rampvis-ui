@@ -11,11 +11,33 @@ function SubgraphCpg(props) {
   const LoadGraph = () => {
     const loadGraph = useLoadGraph();
     useEffect(() => {
-      const graph = new Graph();
-      graph.import(props.graphObj);
-      console.log(props.graphObj);
-      circular.assign(graph);
-      loadGraph(graph);
+      if (props.graphObj.rows.length) {
+        const networkData = props.graphObj.rows;
+        const cpg_nodes = [...new Set(networkData.map((row) => row.cpg))].map(
+          (row) => ({ key: row, attributes: { color: "#7fc97f" } }),
+        );
+        const snp_nodes = [...new Set(networkData.map((row) => row.snp))].map(
+          (row) => ({ key: row, attributes: { color: "#beaed4" } }),
+        );
+        const nodes = cpg_nodes.concat(snp_nodes);
+        const edges = networkData.map((row) => ({
+          key: row.cpg + row.snp,
+          source: row.cpg,
+          target: row.snp,
+        }));
+        const graphObj = {
+          attributes: { name: "networkCpg" },
+          nodes: nodes,
+          edges: edges,
+        };
+        console.log(graphObj);
+
+        const graph = new Graph();
+        graph.import(graphObj);
+        console.log(graphObj);
+        circular.assign(graph);
+        loadGraph(graph);
+      }
     }, [props.graphObj]);
 
     return null;
@@ -23,32 +45,20 @@ function SubgraphCpg(props) {
 
   return (
     <div>
-      <Grid
-        container
-        sx={{
-          marginLeft: 1,
-          marginBottom: 5,
+      <SigmaContainer
+        id="subgraph"
+        initialSettings={{
+          renderLabels: true,
+          hideLabelsOnMove: false,
         }}
+        style={{ height: "400px", width: "400px" }}
       >
-        <Grid item xs={10}>
-          <Card>
-            <SigmaContainer
-              id="subgraph"
-              initialSettings={{
-                renderLabels: true,
-                hideLabelsOnMove: false,
-              }}
-              style={{ height: "700px", width: "1000px" }}
-            >
-              <LoadGraph />
-              <ControlsContainer>
-                <ForceAtlasControl autoRunFor={100000} />
-                <ZoomControl />
-              </ControlsContainer>
-            </SigmaContainer>
-          </Card>
-        </Grid>
-      </Grid>
+        <LoadGraph />
+        <ControlsContainer>
+          <ForceAtlasControl autoRunFor={100000} />
+          <ZoomControl />
+        </ControlsContainer>
+      </SigmaContainer>
     </div>
   );
 }

@@ -57,28 +57,14 @@ function NetworkLoadBlock(props) {
     };
     const dataUrl = "http://127.0.0.1:4010" + "/network/process";
     const dataResponse = await axios.get(dataUrl, dataParams);
-
-    props.popupClose();
-    props.setCpgData({
+    const gridData = {
       cols: getCols(dataResponse.data[0]),
       rows: dataResponse.data,
-    });
-  };
+    };
 
-  // empty network click
-  const onEmptyNetwork = async () => {
-    const emptyNetworkResponse = await emptyNetwork();
-  };
-
-  // get request to empty network model
-  const emptyNetwork = async () => {
-    // post endpoint to upload data
-    props.popupOpen();
-    const apiUrl = "http://127.0.0.1:4010" + "/network/empty_network";
-    const response = await axios.get(apiUrl);
-    props.setNetwork(false);
     props.popupClose();
-    return response;
+    props.setCpgData(gridData);
+    props.setCircosData(gridData);
   };
 
   const createMarks = (min, max, scale = 1) => {
@@ -166,8 +152,8 @@ function NetworkLoadBlock(props) {
               value={distanceFilter}
               onChange={handleDistance}
               step={125000 * 40}
-              min={0}
-              marks={createMarks(0, 10000000 * 40, 1e6)}
+              min={5000000}
+              marks={createMarks(5000000, 10000000 * 40, 1e6)}
               max={10000000 * 40}
             />
             <Typography variant="caption" gutterBottom>
