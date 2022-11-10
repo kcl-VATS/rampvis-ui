@@ -111,14 +111,14 @@ function CircosArea(props) {
           return gieStainColor[d.gieStain];
         },
       })
-      .chords("c1", chordData, { opacity: 0.5, logScale: false, radius: 0.9 })
+      .chords("c1", chordData, { opacity: 0.5, logScale: false, radius: 0.8 })
 
       .scatter("s1", cpgScatterData, {
-        innerRadius: 0.94,
-        outerRadius: 0.92,
+        innerRadius: 0.92,
+        outerRadius: 0.88,
         strokeWidth: 1,
         shape: "circle",
-        size: 20,
+        size: 30,
         min: 0,
         max: 0.1,
         color: function (d) {
@@ -126,11 +126,11 @@ function CircosArea(props) {
         },
       })
       .scatter("s2", snpScatterData, {
-        innerRadius: 0.98,
-        outerRadius: 0.96,
+        innerRadius: 0.96,
+        outerRadius: 0.9,
         strokeWidth: 1,
         shape: "circle",
-        size: 20,
+        size: 30,
         min: 0,
         max: 0.1,
         color: function (d) {

@@ -15,6 +15,10 @@ import {
 import CircosArea from "src/components/networkVis/CircosPlot";
 import EwasPopUp from "src/components/networkVis/EwasPopUp";
 import InfoPopUp from "src/components/timeseries-sim/InfoPopUp";
+import { route } from "next/dist/server/router";
+import { ro } from "date-fns/locale";
+import { remove } from "nprogress";
+import { rootShouldForwardProp } from "@mui/material/styles/styled";
 
 const defaultServerListState = {
   fileList: ["default"],
@@ -57,6 +61,8 @@ const TimeseriesSim = () => {
 
   const [checkboxCpg, setCheckboxCpg] = useState<GridSelectionModel>([]);
 
+  const [selectMemo, setSelectMemo] = useState<GridSelectionModel>([]);
+
   // open loading circle
   const popUpOpen = () => {
     setRequestLoadPopup(true);
@@ -72,6 +78,101 @@ const TimeseriesSim = () => {
   // close loading circle
   const assocPopUpClose = () => {
     setAssocPopUp(false);
+  };
+
+  const multipleSelectionHandle = (select) => {
+    if (select.length === 0) {
+      // if no checkbox selected
+      setCircosData(cpgData); // draw circos using all data
+    } else {
+      if (selectMemo) {
+        if (select.length > selectMemo.length) {
+          // item removed from datagrid
+
+          const selectedCpgRows = cpgData.rows.filter(
+            (
+              row, // other rows with same cpg values
+            ) => select.includes(row.id),
+          );
+
+          const selectedCpgs = selectedCpgRows.map((row) => row.cpg);
+          const cpg = cpgData.rows.filter((row) =>
+            selectedCpgs.includes(row.cpg),
+          );
+          const cpgIds = cpg.map((row) => row.id);
+
+          const newDataObj = {
+            // filter data to supply to circos plot
+            cols: circosData.cols,
+            rows: cpg,
+          };
+
+          setCircosData(newDataObj);
+
+          setCheckboxCpg(cpgIds);
+
+          setSelectMemo(cpgIds);
+        } else {
+          const removedCpgId = selectMemo.filter(
+            (ids) => !select.includes(ids),
+          ); // cpg clicked on to remove
+
+          const removedCpg = cpgData.rows
+            .filter((rows) => rows.id == removedCpgId)
+            .map((row) => row.cpg); // removed cpg
+
+          const removedIds = cpgData.rows
+            .filter((rows) => rows.cpg == removedCpg)
+            .map((row) => row.id);
+
+          const remainingIds = selectMemo.filter(
+            (ids) => !removedIds.includes(ids),
+          );
+
+          const remainingCpgData = cpgData.rows.filter(
+            (
+              row, // other rows with same cpg values
+            ) => remainingIds.includes(row.id),
+          );
+
+          const newDataObj = {
+            // filter data to supply to circos plot
+            cols: circosData.cols,
+            rows: remainingCpgData,
+          };
+
+          setCircosData(newDataObj);
+
+          setCheckboxCpg(remainingIds);
+
+          setSelectMemo(remainingIds);
+        }
+      } else {
+        const selectedCpgRows = cpgData.rows.filter(
+          (
+            row, // other rows with same cpg values
+          ) => select.includes(row.id),
+        );
+
+        const selectedCpgs = selectedCpgRows.map((row) => row.cpg);
+        const cpg = cpgData.rows.filter((row) =>
+          selectedCpgs.includes(row.cpg),
+        );
+        const cpgIds = cpg.map((row) => row.id);
+
+        const newDataObj = {
+          // filter data to supply to circos plot
+          cols: circosData.cols,
+          rows: cpg,
+        };
+
+        setCircosData(newDataObj);
+
+        setCheckboxCpg(cpgIds);
+
+        setSelectMemo(cpgIds);
+      }
+    }
   };
 
   const handleRowClick: GridEventListener<"rowClick"> = async (
@@ -179,27 +280,9 @@ const TimeseriesSim = () => {
                     }}
                     components={{ Toolbar: GridToolbar }}
                     checkboxSelection
-                    onSelectionModelChange={(select) => {
-                      console.log(select);
-
-                      if (select.length === 0) {
-                        console.log("logic works");
-                        setCircosData(cpgData);
-                      } else {
-                        const selectedCpgRows = cpgData.rows.filter((row) =>
-                          select.includes(row.id),
-                        );
-
-                        const newDataObj = {
-                          cols: circosData.cols,
-                          rows: selectedCpgRows,
-                        };
-
-                        setCircosData(newDataObj);
-                      }
-
-                      setCheckboxCpg(select);
-                    }}
+                    onSelectionModelChange={(select) =>
+                      multipleSelectionHandle(select)
+                    }
                     selectionModel={checkboxCpg}
                   />
                 </Card>
