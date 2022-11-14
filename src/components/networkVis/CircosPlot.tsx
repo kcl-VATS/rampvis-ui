@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import { Button, Card } from "@mui/material";
+import { Button, Card, Grid } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import Circos from "./plots/circos/circosPlot";
 import GRCh37 from "./data/layout/GRCh37.json";
 import cytobands from "./data/layout/cytobands.json";
 import gieStainColor from "./data/layout/gieStainColor.json";
 import toImg from "react-svg-to-image";
+import PropagatedPage from "src/pages/page";
 
 // default plot configs
 const defaultConf = {
@@ -89,10 +90,27 @@ function CircosArea(props) {
         index === self.findIndex((t) => t.id === value.id),
     );
 
+    let cpgUnique = [
+      ...new Set(props.data.rows.map((d) => "chr" + d["cpg_chr"])),
+    ];
+    let snpUnique = [
+      ...new Set(props.data.rows.map((d) => "chr" + d["snp_chr"])),
+    ];
+
+    const chromUnique = [...new Set(cpgUnique.concat(snpUnique))];
+
+    const filteredLayout = GRCh37.filter((d) => chromUnique.includes(d.id));
+
+    const filteredCyto = cytobandData.filter((d) =>
+      chromUnique.includes(d.block_id),
+    );
+
+    console.log("unique", chromUnique);
+
     const circosExample = Circos(defaultConf);
 
     circosExample
-      .layout(GRCh37, {
+      .layout(filteredLayout, {
         inneradius: defaultConf.width / 2 - 70,
         outerRadius: defaultConf.width / 2 - 40,
         labels: {
@@ -103,7 +121,7 @@ function CircosArea(props) {
           labelDenominator: 1000000,
         },
       })
-      .highlight("cytobands", cytobandData, {
+      .highlight("cytobands", filteredCyto, {
         innerRadius: defaultConf.width / 2 - 100,
         outerRadius: defaultConf.width / 2 - 40,
         opacity: 0.4,
@@ -111,7 +129,14 @@ function CircosArea(props) {
           return gieStainColor[d.gieStain];
         },
       })
-      .chords("c1", chordData, { opacity: 0.5, logScale: false, radius: 0.8 })
+      .chords("c1", chordData, {
+        opacity: 0.5,
+        logScale: false,
+        radius: 0.8,
+        tooltipContent: function (d) {
+          return d.source.id + " ➤ " + d.target.id;
+        },
+      })
 
       .scatter("s1", cpgScatterData, {
         innerRadius: 0.92,
@@ -142,7 +167,8 @@ function CircosArea(props) {
 
   return (
     <Card sx={{ height: "100%", width: 800 }}>
-      <div id="circos"></div>
+      <div align="center" id="circos"></div>
+
       <Button
         variant="contained"
         style={{ alignSelf: "right" }}

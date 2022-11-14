@@ -10,26 +10,88 @@ import {
   Card,
   CardContent,
   MenuItem,
+  Grid,
+  OutlinedInput,
+  InputLabel,
+  ListItemText,
+  Checkbox,
 } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+
+const listToStr = (chr_lst) => {
+  let text = "0";
+  chr_lst.map((chr) => (text = text + "-" + chr));
+  return text;
+};
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+const chromosomes = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "21",
+  "22",
+  "X",
+  "Y",
+];
 
 const getCols = (row) =>
   Object.keys(row).map((key) => {
     return { field: key, headerName: key, width: 100 };
   });
 
-const cisTransOpts = ["cis-only", "trans-only", "cis/trans", "all"];
-
 function NetworkLoadBlock(props) {
-  const [filterPopup, setFilterPopup] = useState(false);
-  const [distanceFilter, setDistanceFilter] = useState(5000000);
-  const [minAssociation, setMinAssociation] = useState(3);
-  const [minUniqueChr, setMinUniqueChr] = useState(1);
+  const [filterPopup, setFilterPopup] = useState<boolean>(false);
+  const [distanceFilter, setDistanceFilter] = useState<number>(1000000);
+  const [minAssociation, setMinAssociation] = useState<number>(3);
+  const [minPval, setMinPval] = useState(6);
+  const [chromosomeList, setChromosomeList] = useState<string[]>(chromosomes);
+
+  const handleChromosome = (
+    event: SelectChangeEvent<typeof chromosomeList>,
+  ) => {
+    const {
+      target: { value },
+    } = event;
+    setChromosomeList(
+      // On autofill we get a stringified value.
+      typeof value === "string" ? value.split(",") : value,
+    );
+  };
 
   const handleMinAssociation = (event) => setMinAssociation(event.target.value);
   const handleDistance = (event) => setDistanceFilter(event.target.value);
-  const handleMinUniqueChr = (event) => setMinUniqueChr(event.target.value);
+  const handleMinPval = (event) => setMinPval(event.target.value);
+
   const handleFilterButton = () => setFilterPopup((value) => !value);
 
   // checks if the network is loaded
@@ -44,6 +106,7 @@ function NetworkLoadBlock(props) {
   };
 
   // get request to change .txt to network model
+
   const loadNetwork = async () => {
     // post endpoint to upload data
     props.popupOpen();
@@ -52,11 +115,16 @@ function NetworkLoadBlock(props) {
         file: props.file,
         minDistance: distanceFilter,
         minAssoc: minAssociation,
-        minChrom: minUniqueChr,
+        minPval: minPval,
+        chromosomeList: listToStr(chromosomeList),
       },
     };
+    console.log(dataParams);
+
     const dataUrl = "http://127.0.0.1:4010" + "/network/process";
+
     const dataResponse = await axios.get(dataUrl, dataParams);
+
     const gridData = {
       cols: getCols(dataResponse.data[0]),
       rows: dataResponse.data,
@@ -152,7 +220,7 @@ function NetworkLoadBlock(props) {
               value={distanceFilter}
               onChange={handleDistance}
               step={125000 * 40}
-              min={5000000}
+              min={1000000}
               marks={createMarks(5000000, 10000000 * 40, 1e6)}
               max={10000000 * 40}
             />
@@ -162,37 +230,39 @@ function NetworkLoadBlock(props) {
           </Box>
 
           <Box sx={{ width: 500 }}>
-            <Typography noWrap>
-              Minimum number of chromosomes per Cpg
-            </Typography>
-            <Slider
-              sx={{ width: 500 }}
-              value={minUniqueChr}
-              onChange={handleMinUniqueChr}
-              step={1}
-              min={0}
-              marks={createMarks(0, 10)}
-              max={10}
-            />
-            <Typography variant="caption" gutterBottom>
-              {minUniqueChr}
-            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={4}>
+                <Typography noWrap>Minimum p value 1e-</Typography>
+              </Grid>
+              <Grid item xs={8}>
+                <TextField
+                  type="number"
+                  value={minPval}
+                  onChange={handleMinPval}
+                  InputProps={{ inputProps: { min: 0 } }}
+                />
+              </Grid>
+            </Grid>
           </Box>
 
           <Box sx={{ width: 500 }}>
-            <Typography gutterBottom>Cis/Trans Options</Typography>
-            <TextField
-              select
-              variant="outlined"
-              name="indicator"
-              sx={{ width: 500 }}
+            <Typography noWrap>Chromosomes to include:</Typography>
+            <Select
+              multiple
+              value={chromosomeList}
+              onChange={handleChromosome}
+              input={<OutlinedInput label="Tag" />}
+              renderValue={(selected) => selected.join(", ")}
+              MenuProps={MenuProps}
+              sx={{ width: 300 }}
             >
-              {cisTransOpts.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
+              {chromosomes.map((chr) => (
+                <MenuItem key={chr} value={chr}>
+                  <Checkbox checked={chromosomeList.indexOf(chr) > -1} />
+                  <ListItemText primary={chr} />
                 </MenuItem>
               ))}
-            </TextField>
+            </Select>
           </Box>
         </DialogContent>
       </Dialog>

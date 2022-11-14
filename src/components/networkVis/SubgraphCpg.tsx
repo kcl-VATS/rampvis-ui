@@ -14,10 +14,16 @@ function SubgraphCpg(props) {
       if (props.graphObj.rows.length) {
         const networkData = props.graphObj.rows;
         const cpg_nodes = [...new Set(networkData.map((row) => row.cpg))].map(
-          (row) => ({ key: row, attributes: { color: "#7fc97f" } }),
+          (row) => ({
+            key: row,
+            attributes: { color: "#7fc97f", size: 15, label: row },
+          }),
         );
         const snp_nodes = [...new Set(networkData.map((row) => row.snp))].map(
-          (row) => ({ key: row, attributes: { color: "#beaed4" } }),
+          (row) => ({
+            key: row,
+            attributes: { color: "#beaed4", size: 15, label: row },
+          }),
         );
         const nodes = cpg_nodes.concat(snp_nodes);
         const edges = networkData.map((row) => ({
@@ -51,7 +57,7 @@ function SubgraphCpg(props) {
           renderLabels: true,
           hideLabelsOnMove: false,
         }}
-        style={{ height: "400px", width: "400px" }}
+        style={{ height: "400px", width: "800px" }}
       >
         <LoadGraph />
         <ControlsContainer>

@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import assign from "lodash/assign";
 import isFunction from "lodash/isFunction";
 import { common, values } from "../configs";
-import { CollectionsBookmarkRounded } from "@mui/icons-material";
+import { registerTooltip } from "../tooltip/tooltip";
 
 const defaultConf = assign(
   {
@@ -87,6 +87,7 @@ export default class Chords extends Track {
       )
       .attr("opacity", conf.opacity)
       .on("mouseover", (d) => {
+        this.dispatch.call("mouseover", this, d);
         const selected_id_cpg = d3.selectAll("#" + d.cpgData.id).attr("id");
         const selected_id_snp = d3.selectAll("#" + d.snpData.id).attr("id");
 
@@ -102,6 +103,7 @@ export default class Chords extends Track {
           .style("visibility", "hidden");
       })
       .on("mouseout", (d) => {
+        this.dispatch.call("mouseout", this, d);
         d3.selectAll(".chord").style("visibility", "visible");
         d3.selectAll(".point").style("visibility", "visible");
       });
@@ -126,11 +128,9 @@ export default class Chords extends Track {
       this.getCoordinates,
     );
 
-    /*
     if (this.conf.tooltipContent) {
-      registerTooltip(this, instance, selection, this.conf)
+      registerTooltip(this, instance, selection, this.conf);
     }
-    */
 
     return this;
   }

@@ -20,5 +20,7 @@
   { "id": "chr19", "label": "chr19", "color": "#9900CC", "len": 59128983 },
   { "id": "chr20", "label": "chr20", "color": "#CC33FF", "len": 63025520 },
   { "id": "chr21", "label": "chr21", "color": "#CC99FF", "len": 48129895 },
-  { "id": "chr22", "label": "chr22", "color": "#666666", "len": 51304566 }
+  { "id": "chr22", "label": "chr22", "color": "#666666", "len": 51304566 },
+  { "id": "chrX", "label": "chrX", "color": "#999999", "len": 155270560 },
+  { "id": "chrY", "label": "chrY", "color": "#CCCCCC", "len": 59373566 }
 ]

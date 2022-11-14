@@ -4,10 +4,11 @@ import render from "./render/render";
 import Chords from "./tracks/chord";
 import Scatter from "./tracks/scatter";
 import Highlight from "./tracks/highlight";
+import defaultsDeep from "lodash/defaultsDeep";
 
 const defaultConf = {
-  width: 800,
-  height: 800,
+  width: 500,
+  height: 500,
   container: "circos",
   defaultTrackWidth: 40,
 };
@@ -16,7 +17,7 @@ class Core {
   constructor(conf) {
     this.tracks = {};
     this._layout = null;
-    this.conf = defaultConf;
+    this.conf = defaultsDeep(conf, defaultConf);
     d3.select("#" + conf.container).html(null);
     const container = d3
       .select("#" + this.conf.container)

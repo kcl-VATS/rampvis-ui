@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Grid, Card, Box, Dialog, DialogContent, Button } from "@mui/material";
+import {
+  Grid,
+  Card,
+  Box,
+  Dialog,
+  DialogContent,
+  Button,
+  Typography,
+} from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import SubgraphCpg from "./SubgraphCpg";
 
@@ -8,6 +16,7 @@ function EwasPopUp(props) {
     <Dialog fullScreen={true} onClose={props.close} open={props.state}>
       <DialogContent>
         <Box>
+          <Typography>Ewas Data</Typography>
           {props.ewasData.rows?.length ? (
             <Grid item xs={12} sx={{ width: 800 }}>
               <Card sx={{ width: 800 }}>
@@ -23,7 +32,8 @@ function EwasPopUp(props) {
           ) : (
             <div> No result </div>
           )}
-
+          <h2></h2>
+          <Typography> Network Data and Graph</Typography>
           {props.subgraphData.rows?.length ? (
             <Grid item xs={12} sx={{ width: 800 }}>
               <Card sx={{ width: 800 }}>
@@ -34,6 +44,8 @@ function EwasPopUp(props) {
                   pageSize={10}
                   components={{ Toolbar: GridToolbar }}
                 />
+
+                <SubgraphCpg graphObj={props.subgraphData}></SubgraphCpg>
               </Card>
             </Grid>
           ) : (
@@ -55,8 +67,6 @@ function EwasPopUp(props) {
           ) : (
             <div> No result </div>
           )}
-
-          <SubgraphCpg graphObj={props.subgraphData}></SubgraphCpg>
 
           <Button onClick={props.close}>Close</Button>
         </Box>
