@@ -14,11 +14,6 @@ import {
 } from "@mui/x-data-grid";
 import CircosArea from "src/components/networkVis/CircosPlot";
 import EwasPopUp from "src/components/networkVis/EwasPopUp";
-import InfoPopUp from "src/components/timeseries-sim/InfoPopUp";
-import { route } from "next/dist/server/router";
-import { ro } from "date-fns/locale";
-import { remove } from "nprogress";
-import { rootShouldForwardProp } from "@mui/material/styles/styled";
 
 const defaultServerListState = {
   fileList: ["default"],
@@ -55,7 +50,11 @@ const TimeseriesSim = () => {
 
   const [ewasResult, setEwasResult] = useState({ cols: [], rows: [] });
 
-  const [subgraphResult, setSubgraphResult] = useState({ cols: [], rows: [] });
+  const [subgraphResult, setSubgraphResult] = useState({
+    cols: [],
+    rows: [],
+    attr: [],
+  });
 
   const [godmcResult, setGodmcResult] = useState({ cols: [], rows: [] });
 
@@ -185,9 +184,9 @@ const TimeseriesSim = () => {
     popUpOpen();
 
     const response = await axios.get(ewasUrl, {
-      params: { cpg: ewasQuery, file: fileToNetwork, targetCpg: ewasQuery },
+      params: { cpg: ewasQuery, file: fileToNetwork, level: 1 },
     });
-    console.log(response);
+
     const ewasResponse = response.data.ewas;
     const ewasFields = ewasResponse.fields;
     const ewasCols = ewasResponse.fields.map((cols) => ({
@@ -202,16 +201,19 @@ const TimeseriesSim = () => {
 
     ewasRows = ewasRows.map((data, i) => ({ ...data, id: i }));
 
-    const subgraphResponse = response.data.subgraph;
+    const subgraphResponse = response.data.subgraph.edgeAttributes;
+    const subgraphAttributes = response.data.subgraph.nodeAttributes;
 
     let godmcResponse = response.data.godmc;
 
     popUpClose();
 
     setEwasResult({ cols: ewasCols, rows: ewasRows });
+
     setSubgraphResult({
       cols: getCols(subgraphResponse[0]),
       rows: subgraphResponse,
+      attr: subgraphAttributes,
     });
 
     if (typeof godmcResponse !== "string") {

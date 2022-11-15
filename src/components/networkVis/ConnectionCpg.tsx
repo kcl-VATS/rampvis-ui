@@ -18,7 +18,6 @@ function ConnectionCpg(props) {
   const onGetSubgraph = async () => {
     const subGraphResponse = await getSubgraph();
     setGraphObj(subGraphResponse.data);
-    console.log(subGraphResponse);
   };
   // get request to get nodes and edges of network given cpg
   const getSubgraph = async () => {

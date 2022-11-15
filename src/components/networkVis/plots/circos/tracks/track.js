@@ -4,7 +4,7 @@ import { getConf } from "../config-utils";
 import { buildScale } from "../utils";
 import { buildColorValue } from "../colors";
 import { renderAxes } from "../axes";
-
+import { registerTooltip } from "../tooltip/tooltip";
 /**
  * Abstract class used by all tracks
  **/
@@ -33,7 +33,6 @@ export default class Track {
 
   loadData(data, instance) {
     const result = this.parseData(data, instance._layout.summary());
-    console.log("chord_data", result);
     this.data = result.data;
     this.meta = result.meta;
   }
@@ -59,27 +58,23 @@ export default class Track {
       this.conf,
       instance._layout,
     );
-    /*
-    if (this.conf.tooltipContent) {
-      registerTooltip(this, instance, selection, this.conf)
-    }
-    selection.on('mouseover', (d, i) => {
-      this.dispatch.call('mouseover', this, d)
-      if (this.conf.tooltipContent) {
-        instance.clipboard.attr('value', this.conf.tooltipContent(d))
-      }
-    })
-    selection.on('mouseout', (d, i) => {
-      this.dispatch.call('mouseout', this, d)
-    })
-    */
 
-    /*
+    if (this.conf.tooltipContent) {
+      registerTooltip(this, instance, selection, this.conf);
+    }
+    selection.on("mouseover", (d, i) => {
+      this.dispatch.call("mouseover", this, d);
+    });
+    selection.on("mouseout", (d, i) => {
+      this.dispatch.call("mouseout", this, d);
+    });
+
     Object.keys(this.conf.events).forEach((eventName) => {
-      const conf = this.conf
-      selection.on(eventName, function (d, i, nodes) { conf.events[eventName](d, i, nodes, event) })
-    })
-    */
+      const conf = this.conf;
+      selection.on(eventName, function (d, i, nodes) {
+        conf.events[eventName](d, i, nodes, event);
+      });
+    });
 
     return this;
   }

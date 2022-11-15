@@ -35,14 +35,9 @@ function NetworkDataBlock(props) {
   const onFileUpload = async () => {
     props.popupOpen();
     const fileUploadResponse = await uploadFile();
-    console.log("fileUploadResponse = ", fileUploadResponse.data);
-
     const fileListFromServerResponse = await props.getFileList();
     props.setFileList(fileListFromServerResponse.data);
-    console.log(
-      "fileListFromServerResponse = ",
-      fileListFromServerResponse.data,
-    );
+
     props.popupClose();
   };
 

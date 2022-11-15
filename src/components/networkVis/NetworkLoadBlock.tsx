@@ -119,7 +119,6 @@ function NetworkLoadBlock(props) {
         chromosomeList: listToStr(chromosomeList),
       },
     };
-    console.log(dataParams);
 
     const dataUrl = "http://127.0.0.1:4010" + "/network/process";
 

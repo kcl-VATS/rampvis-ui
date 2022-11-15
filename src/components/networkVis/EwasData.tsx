@@ -18,7 +18,6 @@ function EwasData(props) {
   const fetchEwas = async () => {
     const cpgData = await axios.get(ewasUrl, { params: { cpg: ewasQuery } });
     setEwasResult(cpgData.data);
-    console.log(cpgData.data);
   };
 
   return (

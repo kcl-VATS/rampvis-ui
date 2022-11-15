@@ -41,13 +41,13 @@ function CircosArea(props) {
       return {
         source: {
           id: `chr${d["cpg_chr"]}`,
-          start: parseInt(d["cpg_pos"]) - 3000000,
-          end: parseInt(d["cpg_pos"]) + 3000000,
+          start: parseInt(d["cpg_pos"]) - 1000000,
+          end: parseInt(d["cpg_pos"]) + 1000000,
         },
         target: {
           id: `chr${d["snp_chr"]}`,
-          start: parseInt(d["snp_pos"]) - 3000000,
-          end: parseInt(d["snp_pos"]) + 3000000,
+          start: parseInt(d["snp_pos"]) - 1000000,
+          end: parseInt(d["snp_pos"]) + 1000000,
         },
         cpgData: {
           id: d["cpg"],
@@ -105,8 +105,6 @@ function CircosArea(props) {
       chromUnique.includes(d.block_id),
     );
 
-    console.log("unique", chromUnique);
-
     const circosExample = Circos(defaultConf);
 
     circosExample
@@ -130,9 +128,9 @@ function CircosArea(props) {
         },
       })
       .chords("c1", chordData, {
-        opacity: 0.5,
+        opacity: 0.9,
         logScale: false,
-        radius: 0.8,
+        radius: 0.88,
         tooltipContent: function (d) {
           return d.source.id + " ➤ " + d.target.id;
         },
@@ -149,6 +147,9 @@ function CircosArea(props) {
         color: function (d) {
           return "#ff6400";
         },
+        tooltipContent: function (d) {
+          return d.id;
+        },
       })
       .scatter("s2", snpScatterData, {
         innerRadius: 0.96,
@@ -161,6 +162,9 @@ function CircosArea(props) {
         color: function (d) {
           return "#009cff";
         },
+        tooltipContent: function (d) {
+          return d.id;
+        },
       })
       .render();
   }, [props.data]);
@@ -168,7 +172,6 @@ function CircosArea(props) {
   return (
     <Card sx={{ height: "100%", width: 800 }}>
       <div align="center" id="circos"></div>
-
       <Button
         variant="contained"
         style={{ alignSelf: "right" }}

@@ -14,7 +14,6 @@ import {
 } from "d3-shape";
 
 import * as d3 from "d3";
-import { F } from "lodash/fp";
 
 const defaultConf = assign(
   {
@@ -114,6 +113,7 @@ export default class Scatter extends Track {
       .attr("stroke-width", conf.strokeWidth)
       .attr("fill", "none")
       .on("mouseover", (d) => {
+        this.dispatch.call("mouseover", this, d);
         const id = d.id;
 
         const assoc_points = d3
@@ -124,7 +124,7 @@ export default class Scatter extends Track {
         const cpg_ids = assoc_points.map((d) => d.cpgData.id);
         const snp_ids = assoc_points.map((d) => d.snpData.id);
         const valid_points = cpg_ids.concat(snp_ids);
-
+        this.dispatch.call("mouseout", this, d);
         d3.selectAll(".chord")
           .filter((d) => ![d.cpgData.id, d.snpData.id].includes(id))
           .style("visibility", "hidden");
