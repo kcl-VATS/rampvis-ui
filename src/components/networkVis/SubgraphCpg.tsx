@@ -6,7 +6,7 @@ import "react-sigma-v2/lib/react-sigma-v2.css";
 import circular from "graphology-layout/circular";
 import { ForceAtlasControl } from "react-sigma-v2";
 import { ControlsContainer, ZoomControl } from "react-sigma-v2";
-import { CollectionsBookmarkRounded } from "@mui/icons-material";
+import GraphEvents from "./networkHelpers/GraphEvents";
 
 const cpgColorLevel = {
   0: "#c51b8a",
@@ -68,10 +68,6 @@ function SubgraphCpg(props) {
 
         graph.import(graphObj);
 
-        graph.forEachNode((node, attributes) => {
-          console.log(graph.neighbors(node));
-        });
-
         circular.assign(graph);
         loadGraph(graph);
       }
@@ -91,10 +87,8 @@ function SubgraphCpg(props) {
         style={{ height: "400px", width: "800px" }}
       >
         <LoadGraph />
-        <ControlsContainer>
-          <ForceAtlasControl />
-          <ZoomControl />
-        </ControlsContainer>
+        <GraphEvents />
+        <ForceAtlasControl autoRunFor={100} />
       </SigmaContainer>
     </div>
   );

@@ -1,5 +1,14 @@
 import { useState, ReactElement } from "react";
-import { Card, Grid, Box } from "@mui/material";
+import {
+  Card,
+  Grid,
+  Box,
+  CardContent,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+} from "@mui/material";
 import DashboardLayout from "src/components/dashboard-layout/DashboardLayout";
 import axios from "axios";
 import { useEffect } from "react";
@@ -15,13 +24,21 @@ import {
 import CircosArea from "src/components/networkVis/CircosPlot";
 import EwasPopUp from "src/components/networkVis/EwasPopUp";
 
+const LOCAL_API = "http://127.0.0.1:4010";
+
+const listToStr = (chr_lst) => {
+  let text = "0";
+  chr_lst.map((chr) => (text = text + "-" + chr));
+  return text;
+};
+
 const defaultServerListState = {
   fileList: ["default"],
 };
 // get request to get list of files
 const getFileList = async () => {
   // get endpoint to get list of files
-  const apiUrl = "http://127.0.0.1:4010" + "/data/check";
+  const apiUrl = LOCAL_API + "/data/check";
   const response = await axios.get(apiUrl);
   return response;
 };
@@ -30,8 +47,6 @@ const getCols = (row) =>
   Object.keys(row).map((key) => {
     return { field: key, headerName: key, width: 100 };
   });
-
-const localApi = "http://127.0.0.1:4010";
 
 const TimeseriesSim = () => {
   // state functions to manage file uploading to the back-end and checking
@@ -61,6 +76,8 @@ const TimeseriesSim = () => {
   const [checkboxCpg, setCheckboxCpg] = useState<GridSelectionModel>([]);
 
   const [selectMemo, setSelectMemo] = useState<GridSelectionModel>([]);
+
+  const [selectedCpgList, setSelectedCpgList] = useState([]);
 
   // open loading circle
   const popUpOpen = () => {
@@ -98,6 +115,8 @@ const TimeseriesSim = () => {
           const cpg = cpgData.rows.filter((row) =>
             selectedCpgs.includes(row.cpg),
           );
+          console.log(selectedCpgs);
+
           const cpgIds = cpg.map((row) => row.id);
 
           const newDataObj = {
@@ -105,6 +124,8 @@ const TimeseriesSim = () => {
             cols: circosData.cols,
             rows: cpg,
           };
+
+          setSelectedCpgList([...new Set(selectedCpgs)]);
 
           setCircosData(newDataObj);
 
@@ -134,11 +155,17 @@ const TimeseriesSim = () => {
             ) => remainingIds.includes(row.id),
           );
 
+          console.log(remainingCpgData.map((row) => row.cpg));
+
           const newDataObj = {
             // filter data to supply to circos plot
             cols: circosData.cols,
             rows: remainingCpgData,
           };
+
+          setSelectedCpgList([
+            ...new Set(remainingCpgData.map((row) => row.cpg)),
+          ]);
 
           setCircosData(newDataObj);
 
@@ -154,6 +181,7 @@ const TimeseriesSim = () => {
         );
 
         const selectedCpgs = selectedCpgRows.map((row) => row.cpg);
+        console.log(selectedCpgs);
         const cpg = cpgData.rows.filter((row) =>
           selectedCpgs.includes(row.cpg),
         );
@@ -165,6 +193,8 @@ const TimeseriesSim = () => {
           rows: cpg,
         };
 
+        setSelectedCpgList([...new Set(selectedCpgs.map((row) => row.cpg))]);
+
         setCircosData(newDataObj);
 
         setCheckboxCpg(cpgIds);
@@ -174,12 +204,9 @@ const TimeseriesSim = () => {
     }
   };
 
-  const handleRowClick: GridEventListener<"rowClick"> = async (
-    params, // GridRowParams
-  ) => {
-    const ewasUrl = localApi + "/network/ewas";
-
-    const ewasQuery = params.row.cpg;
+  const handleCpgList = async () => {
+    const ewasUrl = LOCAL_API + "/network/ewas";
+    const ewasQuery = listToStr(selectedCpgList).slice(2);
 
     popUpOpen();
 
@@ -255,6 +282,46 @@ const TimeseriesSim = () => {
             </Grid>
 
             <Grid item xs={12}>
+              <div>
+                <Card sx={{ width: 400 }}>
+                  <CardContent>
+                    <div
+                      style={{
+                        borderStyle: "solid",
+                        borderColor: "#c4c4c4",
+                        borderWidth: "1px",
+                        borderRadius: "12px",
+                        minHeight: "200px",
+                      }}
+                    >
+                      <List
+                        sx={{
+                          position: "relative",
+                          overflow: "auto",
+                          maxHeight: 300,
+                        }}
+                      >
+                        {selectedCpgList.map(
+                          (
+                            cpgs, // time series bag list creation
+                          ) => (
+                            <ListItem key={cpgs}>
+                              <ListItemText primary={cpgs} />
+                            </ListItem>
+                          ),
+                        )}
+                      </List>
+                    </div>
+
+                    <Button variant="outlined" onClick={handleCpgList}>
+                      Go to advanced view
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </Grid>
+
+            <Grid item xs={12}>
               <NetworkLoadBlock
                 popupOpen={popUpOpen}
                 popupClose={popUpClose}
@@ -271,7 +338,6 @@ const TimeseriesSim = () => {
                   <DataGrid
                     rows={cpgData.rows}
                     columns={cpgData.cols}
-                    onRowClick={handleRowClick}
                     autoHeight
                     pageSize={10}
                     componentsProps={{

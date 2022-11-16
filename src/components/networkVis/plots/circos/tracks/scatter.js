@@ -13,6 +13,7 @@ import {
   symbolWye,
 } from "d3-shape";
 
+import { registerTooltip } from "../tooltip/tooltip";
 import * as d3 from "d3";
 
 const defaultConf = assign(
@@ -113,7 +114,6 @@ export default class Scatter extends Track {
       .attr("stroke-width", conf.strokeWidth)
       .attr("fill", "none")
       .on("mouseover", (d) => {
-        this.dispatch.call("mouseover", this, d);
         const id = d.id;
 
         const assoc_points = d3
@@ -124,7 +124,9 @@ export default class Scatter extends Track {
         const cpg_ids = assoc_points.map((d) => d.cpgData.id);
         const snp_ids = assoc_points.map((d) => d.snpData.id);
         const valid_points = cpg_ids.concat(snp_ids);
-        this.dispatch.call("mouseout", this, d);
+
+        console.log(valid_points);
+
         d3.selectAll(".chord")
           .filter((d) => ![d.cpgData.id, d.snpData.id].includes(id))
           .style("visibility", "hidden");
@@ -132,11 +134,14 @@ export default class Scatter extends Track {
         d3.selectAll(".point")
           .filter((d) => !valid_points.includes(d.id))
           .style("visibility", "hidden");
+
+        this.dispatch.call("mouseover", this, d);
       })
 
       .on("mouseout", (d) => {
         d3.selectAll(".chord").style("visibility", "visible");
         d3.selectAll(".point").style("visibility", "visible");
+        this.dispatch.call("mouseout", this, d);
       });
 
     if (conf.fill) {
