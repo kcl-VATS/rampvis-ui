@@ -1,10 +1,18 @@
-import { Grid, Card } from "@mui/material";
-import { useEffect } from "react";
-import { SigmaContainer, useLoadGraph } from "@react-sigma/core";
+import { useEffect, useState } from "react";
+import { SigmaContainer, useLoadGraph, useSigma } from "react-sigma-v2";
 import Graph from "graphology";
+import "react-sigma-v2/lib/react-sigma-v2.css";
 import circular from "graphology-layout/circular";
-import { ControlsContainer, ZoomControl } from "@react-sigma/core";
-import GraphEvents from "./networkHelpers/GraphEvents";
+import { ForceAtlasControl } from "react-sigma-v2";
+import {
+  ControlsContainer,
+  ZoomControl,
+  SearchControl,
+  useRegisterEvents,
+  useSetSettings,
+} from "react-sigma-v2";
+import DragnDrop from "./networkHelpers/DragnDrop";
+import { Attributes } from "graphology-types";
 
 const cpgColorLevel = {
   0: "#c51b8a",
@@ -20,6 +28,11 @@ const snpColorLevel = {
 
 function SubgraphCpg(props) {
   const LoadGraph = () => {
+    const registerEvents = useRegisterEvents();
+    const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+    const setSettings = useSetSettings();
+    const sigma = useSigma();
+
     const loadGraph = useLoadGraph();
     useEffect(() => {
       if (props.graphObj.rows.length) {
@@ -35,7 +48,7 @@ function SubgraphCpg(props) {
             key: row,
             attributes: {
               color: cpgColorLevel[cpgLevelObj[row]],
-              size: 5,
+              size: 3,
               label: row,
             },
           }),
@@ -45,7 +58,7 @@ function SubgraphCpg(props) {
             key: row,
             attributes: {
               color: snpColorLevel[snpLevelObj[row]],
-              size: 5,
+              size: 3,
               label: row,
             },
           }),
@@ -68,8 +81,47 @@ function SubgraphCpg(props) {
 
         circular.assign(graph);
         loadGraph(graph);
+
+        registerEvents({
+          enterNode: (event) => setHoveredNode(event.node),
+          leaveNode: () => setHoveredNode(null),
+        });
       }
     }, [props.graphObj]);
+
+    useEffect(() => {
+      setSettings({
+        nodeReducer: (node, data) => {
+          const graph = sigma.getGraph();
+          const newData: Attributes = {
+            ...data,
+            highlighted: data.highlighted || false,
+          };
+
+          if (hoveredNode) {
+            if (
+              node === hoveredNode ||
+              graph.neighbors(hoveredNode).includes(node)
+            ) {
+              newData.highlighted = true;
+            } else {
+              newData.color = "#E2E2E2";
+              newData.highlighted = false;
+            }
+          }
+          return newData;
+        },
+        edgeReducer: (edge, data) => {
+          const graph = sigma.getGraph();
+          const newData = { ...data, hidden: false };
+
+          if (hoveredNode && !graph.extremities(edge).includes(hoveredNode)) {
+            newData.hidden = true;
+          }
+          return newData;
+        },
+      });
+    }, [hoveredNode, setSettings, sigma]);
 
     return null;
   };
@@ -78,14 +130,24 @@ function SubgraphCpg(props) {
     <div>
       <SigmaContainer
         id="subgraph"
-        settings={{
+        initialSettings={{
           renderLabels: true,
           hideLabelsOnMove: false,
+          maxCameraRatio: 1,
+          minCameraRatio: 0.1,
+          allowInvalidContainer: true,
         }}
-        style={{ height: "400px", width: "800px" }}
+        style={{ height: "800px", width: "800px" }}
       >
         <LoadGraph />
-        <GraphEvents />
+        <DragnDrop />
+        <ControlsContainer position={"bottom-right"}>
+          <ZoomControl />
+          <ForceAtlasControl autoRunFor={2000} />
+        </ControlsContainer>
+        <ControlsContainer position={"top-right"}>
+          <SearchControl />
+        </ControlsContainer>
       </SigmaContainer>
     </div>
   );

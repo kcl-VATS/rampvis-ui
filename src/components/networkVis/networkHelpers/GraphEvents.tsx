@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 
-import { useRegisterEvents } from "@react-sigma/core";
-
+import { useRegisterEvents } from "react-sigma-v2";
+import { ForceAtlasControl } from "react-sigma-v2";
 const GraphEvents = () => {
   const registerEvents = useRegisterEvents();
 
