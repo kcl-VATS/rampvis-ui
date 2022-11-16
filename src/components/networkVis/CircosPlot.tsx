@@ -6,8 +6,6 @@ import GRCh37 from "./data/layout/GRCh37.json";
 import cytobands from "./data/layout/cytobands.json";
 import gieStainColor from "./data/layout/gieStainColor.json";
 import toImg from "react-svg-to-image";
-import PropagatedPage from "src/pages/page";
-
 // default plot configs
 const defaultConf = {
   width: 700,

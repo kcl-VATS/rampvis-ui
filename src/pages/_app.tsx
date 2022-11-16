@@ -37,6 +37,7 @@ import "src/lib/vis/css/pv-legend.css";
 import "src/lib/vis/css/ensemble.css";
 import "src/components/story-boards/ScrollingSvg.css";
 import "src/components/networkVis/plots/circos/tooltip/tooltip.css";
+import "@react-sigma/core/lib/react-sigma.min.css";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;

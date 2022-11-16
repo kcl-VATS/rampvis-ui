@@ -1,11 +1,9 @@
 import { Grid, Card } from "@mui/material";
 import { useEffect } from "react";
-import { SigmaContainer, useLoadGraph } from "react-sigma-v2";
+import { SigmaContainer, useLoadGraph } from "@react-sigma/core";
 import Graph from "graphology";
-import "react-sigma-v2/lib/react-sigma-v2.css";
 import circular from "graphology-layout/circular";
-import { ForceAtlasControl } from "react-sigma-v2";
-import { ControlsContainer, ZoomControl } from "react-sigma-v2";
+import { ControlsContainer, ZoomControl } from "@react-sigma/core";
 import GraphEvents from "./networkHelpers/GraphEvents";
 
 const cpgColorLevel = {
@@ -80,7 +78,7 @@ function SubgraphCpg(props) {
     <div>
       <SigmaContainer
         id="subgraph"
-        initialSettings={{
+        settings={{
           renderLabels: true,
           hideLabelsOnMove: false,
         }}
@@ -88,7 +86,6 @@ function SubgraphCpg(props) {
       >
         <LoadGraph />
         <GraphEvents />
-        <ForceAtlasControl autoRunFor={100} />
       </SigmaContainer>
     </div>
   );
