@@ -81,19 +81,5 @@ export const renderAxes = (parentElement, conf, instance, scale) => {
     .attr("stroke-width", (d) => d.thickness)
     .attr("stroke", (d) => d.color);
 
-  if (conf.showAxesTooltip) {
-    selection.on("mouseover", (d, i) => {
-      instance.tip
-        .html(d.value)
-        .transition()
-        .style("opacity", 0.9)
-        .style("left", event.pageX + "px")
-        .style("top", event.pageY - 28 + "px");
-    });
-    selection.on("mouseout", (d, i) => {
-      instance.tip.transition().duration(500).style("opacity", 0);
-    });
-  }
-
   return selection;
 };

@@ -19,6 +19,7 @@ import {
 import axios from "axios";
 import { useState } from "react";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { alignProperty } from "@mui/material/styles/cssUtils";
 
 const listToStr = (chr_lst) => {
   let text = "0";
@@ -152,7 +153,7 @@ function NetworkLoadBlock(props) {
     <div>
       <Card sx={{ width: 400 }}>
         <CardContent>
-          meQTL Filtering
+          <Typography>Trans MeQTL Search</Typography>
           <h2>
             <TextField
               select
@@ -170,18 +171,26 @@ function NetworkLoadBlock(props) {
               ))}
             </TextField>
 
-            <Button
-              disabled={!props.file}
-              onClick={onLoadNetwork}
-              variant="outlined"
+            <h2>
+              <Button onClick={handleFilterButton} variant="contained">
+                Filter options
+              </Button>
+            </h2>
+            <Box
+              m={1}
+              //margin
+              display="flex"
+              justifyContent="flex-end"
+              alignItems="flex-end"
             >
-              Get Filtered Data
-            </Button>
-          </h2>
-          <h2>
-            <Button onClick={handleFilterButton} variant="outlined">
-              Filter options
-            </Button>
+              <Button
+                disabled={!props.file}
+                onClick={onLoadNetwork}
+                variant="outlined"
+              >
+                Get Filtered Data
+              </Button>
+            </Box>
           </h2>
         </CardContent>
       </Card>

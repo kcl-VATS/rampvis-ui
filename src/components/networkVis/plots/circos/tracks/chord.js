@@ -72,7 +72,7 @@ export default class Chords extends Track {
       .enter()
       .append("path")
       .attr("class", "chord")
-      .attr("fill", (d) => betaColor(d.betaValue.value))
+      .attr("fill", (d) => betaColor(d.stats.beta))
       .attr("id", (d) => d.cpgData.id + "-" + d.snpData.id)
       .attr(
         "d",
