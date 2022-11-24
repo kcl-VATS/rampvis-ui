@@ -26,7 +26,6 @@ function ManhattanArea(props) {
     let snpScatterData = props.data.rows.map(function (d) {
       return {
         id: "snp" + d["snp"].replace(":", "_"),
-        block_id: `chr${d["snp_chr"]}`,
         position: d["snp_pos"],
         value: d["pval"] == 0 ? 0 : -Math.log10(d["pval"]).toFixed(2),
         label: "snp " + d["snp"],
@@ -35,10 +34,18 @@ function ManhattanArea(props) {
       };
     });
 
+    let cpgScatterData = props.data.rows.map(function (d) {
+      return {
+        id: "cpg" + d["cpg"],
+        position: d["cpg_pos"],
+        label: "cpg " + d["cpg"],
+      };
+    });
+
     console.log(props.data);
 
     const snpLims = pvalLimits(snpScatterData);
-    manhattanPlot(snpScatterData, props.data.lims);
+    manhattanPlot(snpScatterData, cpgScatterData, props.data.lims);
   }, [props.data]);
 
   if (props.data.rows.length > 0) {
