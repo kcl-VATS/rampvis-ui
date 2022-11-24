@@ -25,6 +25,7 @@ import { getFileList } from "src/components/networkVis/apiControllers/uploadData
 import CisLoad from "src/components/networkVis/cisLoad";
 import CisView from "src/components/networkVis/CisView";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ManhattanArea from "src/components/networkVis/ManhattanArea";
 
 const LOCAL_API = "http://127.0.0.1:4010";
 const defaultServerListState = {
@@ -62,7 +63,11 @@ const TimeseriesSim = () => {
 
   const [transCpgData, setTransCpgData] = useState({ cols: [], rows: [] });
 
-  const [cisCpgData, setCisCpgData] = useState({ cols: [], rows: [] });
+  const [cisCpgData, setCisCpgData] = useState({
+    cols: [],
+    rows: [],
+    lims: [],
+  });
 
   const [assocPopUp, setAssocPopUp] = useState(false);
 
@@ -153,7 +158,6 @@ const TimeseriesSim = () => {
     }
 
     popUpClose();
-
     assocPopUpOpen();
   };
 
@@ -240,6 +244,7 @@ const TimeseriesSim = () => {
                     graphData={manhattanData}
                     graphHandle={setManhattanData}
                   />
+                  <ManhattanArea data={cisCpgData} graphData={manhattanData} />
                 </Collapse>
               </Card>
             </Grid>

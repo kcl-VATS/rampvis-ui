@@ -97,6 +97,7 @@ function CisLoad(props) {
     const gridData = {
       cols: getCols(dataResponse.data[0]),
       rows: dataResponse.data,
+      lims: [startPos, endPos],
     };
 
     props.setCpgData(gridData);
