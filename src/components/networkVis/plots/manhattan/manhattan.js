@@ -34,7 +34,7 @@ export function manhattanPlot(snpData, cpgData, limit) {
     .attr("id", "clip")
     .append("svg:rect")
     .attr("width", width)
-    .attr("height", height / 1.5)
+    .attr("height", height * 1.3)
     .attr("x", 0)
     .attr("y", 0);
 
@@ -79,8 +79,8 @@ export function manhattanPlot(snpData, cpgData, limit) {
     .attr("cy", function (d) {
       return y(d["value"]);
     })
-
-    .attr("r", 3);
+    .attr("r", 3)
+    .attr("clip-path", "url(#clip)");
 
   const scatterCpg = svg.append("g").attr("id", "scatterCpg");
 
@@ -94,7 +94,8 @@ export function manhattanPlot(snpData, cpgData, limit) {
     .attr("r", 3)
     .attr("fill", (d) => {
       return "red";
-    });
+    })
+    .attr("clip-path", "url(#clip)");
 
   scatterSnp.append("g").attr("class", "brush").call(brush);
 
