@@ -12,15 +12,12 @@ import {
   MenuItem,
   Grid,
   OutlinedInput,
-  InputLabel,
   ListItemText,
   Checkbox,
 } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import { alignProperty } from "@mui/material/styles/cssUtils";
-
 const listToStr = (chr_lst) => {
   let text = "0";
   chr_lst.map((chr) => (text = text + "-" + chr));
@@ -70,7 +67,7 @@ const getCols = (row) =>
     return { field: key, headerName: key, width: 100 };
   });
 
-function NetworkLoadBlock(props) {
+function TransLoad(props) {
   const [filterPopup, setFilterPopup] = useState<boolean>(false);
   const [distanceFilter, setDistanceFilter] = useState<number>(1000000);
   const [minAssociation, setMinAssociation] = useState<number>(3);
@@ -121,7 +118,7 @@ function NetworkLoadBlock(props) {
       },
     };
 
-    const dataUrl = "http://127.0.0.1:4010" + "/network/process";
+    const dataUrl = "http://127.0.0.1:4010" + "/network/trans";
 
     const dataResponse = await axios.get(dataUrl, dataParams);
 
@@ -188,7 +185,7 @@ function NetworkLoadBlock(props) {
                 onClick={onLoadNetwork}
                 variant="outlined"
               >
-                Get Filtered Data
+                View circos plot
               </Button>
             </Box>
           </h2>
@@ -278,4 +275,4 @@ function NetworkLoadBlock(props) {
   );
 }
 
-export default NetworkLoadBlock;
+export default TransLoad;

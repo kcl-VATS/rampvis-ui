@@ -1,23 +1,51 @@
 import { useState, ReactElement } from "react";
-import { Grid, Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import IconButton, { IconButtonProps } from "@mui/material/IconButton";
+import {
+  Grid,
+  Box,
+  Card,
+  CardHeader,
+  CardContent,
+  Collapse,
+  Typography,
+} from "@mui/material";
 import DashboardLayout from "src/components/dashboard-layout/DashboardLayout";
 import axios from "axios";
 import { useEffect } from "react";
 import NetworkDataBlock from "src/components/networkVis/NetworkDataBlock";
-import NetworkLoadBlock from "src/components/networkVis/NetworkLoadBlock";
+import TransLoad from "src/components/networkVis/TransLoad";
 import LoadingPopUp from "src/components/networkVis/LoadingPopUp";
-import CircosArea from "src/components/networkVis/CircosPlot";
+import CircosArea from "src/components/networkVis/CircosArea";
 import EwasPopUp from "src/components/networkVis/EwasPopUp";
 import CpgList from "src/components/networkVis/CpgList";
 import TransView from "src/components/networkVis/TransView";
 import { listToStr, getCols } from "src/components/networkVis/misc/utils";
 import { getFileList } from "src/components/networkVis/apiControllers/uploadData";
-const LOCAL_API = "http://127.0.0.1:4010";
+import CisLoad from "src/components/networkVis/cisLoad";
+import CisView from "src/components/networkVis/CisView";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
+const LOCAL_API = "http://127.0.0.1:4010";
 const defaultServerListState = {
   fileList: ["default"],
 };
 // get request to get list of files
+
+interface ExpandMoreProps extends IconButtonProps {
+  expand: boolean;
+}
+
+const ExpandMore = styled((props: ExpandMoreProps) => {
+  const { expand, ...other } = props;
+  return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+  transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
+  marginLeft: "auto",
+  transition: theme.transitions.create("transform", {
+    duration: theme.transitions.duration.shortest,
+  }),
+}));
 
 const TimeseriesSim = () => {
   // state functions to manage file uploading to the back-end and checking
@@ -28,9 +56,13 @@ const TimeseriesSim = () => {
   // file to be transformed to network format
   const [circosData, setCircosData] = useState({ cols: [], rows: [] });
 
+  const [manhattanData, setManhattanData] = useState({ cols: [], rows: [] });
+
   const [fileToNetwork, setFileToNetwork] = useState("");
 
-  const [cpgData, setCpgData] = useState({ cols: [], rows: [] });
+  const [transCpgData, setTransCpgData] = useState({ cols: [], rows: [] });
+
+  const [cisCpgData, setCisCpgData] = useState({ cols: [], rows: [] });
 
   const [assocPopUp, setAssocPopUp] = useState(false);
 
@@ -45,6 +77,18 @@ const TimeseriesSim = () => {
   const [godmcResult, setGodmcResult] = useState({ cols: [], rows: [] });
 
   const [selectedCpgList, setSelectedCpgList] = useState([]);
+
+  const [circosExpanded, setCircosExpanded] = useState(false);
+
+  const handleCircosExpandClick = () => {
+    setCircosExpanded(!circosExpanded);
+  };
+
+  const [manhattanExpanded, setManhattanExpanded] = useState(false);
+
+  const handleManhattanExpandClick = () => {
+    setManhattanExpanded(!manhattanExpanded);
+  };
 
   // open loading circle
   const popUpOpen = () => {
@@ -130,7 +174,7 @@ const TimeseriesSim = () => {
 
       <Box>
         <Grid>
-          <Grid container spacing={1} sx={{ margin: "auto" }}>
+          <Grid container spacing={2} sx={{ margin: "auto" }}>
             <Grid item xs={12}>
               <NetworkDataBlock
                 popupOpen={popUpOpen}
@@ -141,35 +185,91 @@ const TimeseriesSim = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <NetworkLoadBlock
-                popupOpen={popUpOpen}
-                popupClose={popUpClose}
-                fileList={filesOnServer}
-                file={fileToNetwork}
-                setFile={setFileToNetwork}
-                setCpgData={setCpgData}
-                setCircosData={setCircosData}
-              />
+              <Grid container spacing={{ xs: 1, md: 1 }}>
+                <Grid item xs={0} sm={0} md={0}>
+                  <CisLoad
+                    popupOpen={popUpOpen}
+                    popupClose={popUpClose}
+                    fileList={filesOnServer}
+                    file={fileToNetwork}
+                    setFile={setFileToNetwork}
+                    setCpgData={setCisCpgData}
+                  />
+                </Grid>
+
+                <Grid item xs={0} sm={0} md={0}>
+                  <TransLoad
+                    popupOpen={popUpOpen}
+                    popupClose={popUpClose}
+                    fileList={filesOnServer}
+                    file={fileToNetwork}
+                    setFile={setFileToNetwork}
+                    setCpgData={setTransCpgData}
+                    setCircosData={setCircosData}
+                  />
+                </Grid>
+
+                <Grid item xs={0} sm={0} md={0}>
+                  <CpgList
+                    selectedCpgList={selectedCpgList}
+                    handleCpgList={handleCpgList}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
 
             <Grid item xs={12}>
-              <CpgList
-                selectedCpgList={selectedCpgList}
-                handleCpgList={handleCpgList}
-              />
+              <Card sx={{ width: 800 }}>
+                <CardHeader
+                  action={
+                    <ExpandMore
+                      expand={manhattanExpanded}
+                      onClick={handleManhattanExpandClick}
+                      aria-expanded={manhattanExpanded}
+                      aria-label="show more"
+                    >
+                      <ExpandMoreIcon />
+                    </ExpandMore>
+                  }
+                  title="Manhattan Plot Results"
+                />
+                <Collapse in={manhattanExpanded} timeout="auto" unmountOnExit>
+                  <CisView
+                    data={cisCpgData}
+                    selectionHandle={setSelectedCpgList}
+                    graphData={manhattanData}
+                    graphHandle={setManhattanData}
+                  />
+                </Collapse>
+              </Card>
             </Grid>
 
             <Grid item xs={12}>
-              <TransView
-                data={cpgData}
-                selectionHandle={setSelectedCpgList}
-                graphData={circosData}
-                graphHandle={setCircosData}
-              />
-            </Grid>
+              <Card sx={{ width: 800 }}>
+                <CardHeader
+                  action={
+                    <ExpandMore
+                      expand={circosExpanded}
+                      onClick={handleCircosExpandClick}
+                      aria-expanded={circosExpanded}
+                      aria-label="show more"
+                    >
+                      <ExpandMoreIcon />
+                    </ExpandMore>
+                  }
+                  title="Circos Plot Results"
+                />
 
-            <Grid item xs={12}>
-              <CircosArea data={circosData} />
+                <Collapse in={circosExpanded} timeout="auto" unmountOnExit>
+                  <TransView
+                    data={transCpgData}
+                    selectionHandle={setSelectedCpgList}
+                    graphData={circosData}
+                    graphHandle={setCircosData}
+                  />
+                  <CircosArea data={circosData} />
+                </Collapse>
+              </Card>
             </Grid>
           </Grid>
         </Grid>

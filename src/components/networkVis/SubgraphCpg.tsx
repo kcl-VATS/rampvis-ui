@@ -130,6 +130,7 @@ function SubgraphCpg(props) {
     <div>
       <SigmaContainer
         id="subgraph"
+        graphOptions={{ type: "directed" }}
         initialSettings={{
           renderLabels: true,
           hideLabelsOnMove: false,
@@ -143,7 +144,10 @@ function SubgraphCpg(props) {
         <DragnDrop />
         <ControlsContainer position={"bottom-right"}>
           <ZoomControl />
-          <ForceAtlasControl autoRunFor={2000} />
+          <ForceAtlasControl
+            settings={{ adjustSizes: true }}
+            autoRunFor={2000}
+          />
         </ControlsContainer>
         <ControlsContainer position={"top-right"}>
           <SearchControl />
