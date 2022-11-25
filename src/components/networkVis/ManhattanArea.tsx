@@ -6,10 +6,11 @@ import { manhattanPlot } from "./plots/manhattan/manhattan";
 
 // function to save svg as png
 const savePlot = async () => {
-  const plot = await toImg("#manhattan", "manhattan", {
+  const plot = await toImg("#manhattanPlot", "manhattan", {
     scale: 1,
     quality: 1,
     download: true,
+    background: "white",
   });
 };
 
@@ -42,10 +43,15 @@ function ManhattanArea(props) {
       };
     });
 
-    console.log(props.data);
+    let chordData = props.data.rows.map(function (d) {
+      return {
+        cpg_pos: d["cpg_pos"],
+        snp_pos: d["snp_pos"],
+        value: d["pval"] == 0 ? 0 : -Math.log10(d["pval"]).toFixed(2),
+      };
+    });
 
-    const snpLims = pvalLimits(snpScatterData);
-    manhattanPlot(snpScatterData, cpgScatterData, props.data.lims);
+    manhattanPlot(snpScatterData, cpgScatterData, chordData, props.data.lims);
   }, [props.data]);
 
   if (props.data.rows.length > 0) {
