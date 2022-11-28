@@ -43,6 +43,12 @@ function ManhattanArea(props) {
       };
     });
 
+    cpgScatterData = cpgScatterData.filter(
+      (datum) =>
+        datum.position > props.data.lims[0] &&
+        datum.position < props.data.lims[1],
+    );
+
     let chordData = props.data.rows.map(function (d) {
       return {
         cpg_pos: d["cpg_pos"],
@@ -50,6 +56,12 @@ function ManhattanArea(props) {
         value: d["pval"] == 0 ? 0 : -Math.log10(d["pval"]).toFixed(2),
       };
     });
+
+    chordData = chordData.filter(
+      (datum) =>
+        datum.cpg_pos > props.data.lims[0] &&
+        datum.cpg_pos < props.data.lims[1],
+    );
 
     manhattanPlot(snpScatterData, cpgScatterData, chordData, props.data.lims);
   }, [props.data]);
