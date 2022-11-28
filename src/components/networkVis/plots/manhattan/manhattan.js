@@ -10,6 +10,8 @@ export function manhattanPlot(snpData, cpgData, chordData, limit) {
     }
   };
 
+  const uniqueGenes = (gene) => [...new Set(gene.split(";"))].join(",");
+
   const tickSize = 5;
 
   d3.select("#manhattan").html(""); // empty plot area
@@ -41,67 +43,140 @@ export function manhattanPlot(snpData, cpgData, chordData, limit) {
   // function to handle tooltip actions and creating tooltip box
 
   // this is to cooperate both brushing and tooltip selection in one plot
-  const _tooltip = function _tooltip(selection) {
-    const tooltip_select = plot.select(".tooltipSnp");
-
+  const _tooltip_snp = function _tooltip_snp(selection) {
+    const tooltip_snp = svg.select(".tooltipSnp");
     selection
       .on("mouseover.tooltipSnp", function (d) {
-        tooltip_select.attr(
+        tooltip_snp.attr(
           "transform",
-          `translate(${[d3.mouse(this)[0] - 5, d3.mouse(this)[1] - 35]})`,
+          `translate(${[d3.mouse(this)[0] + 70, d3.mouse(this)[1] + 30]})`,
         );
-        tooltip_select.style("display", null);
-        const tooltip_title = tooltip_select
-          .select("tspan#tooltip_title")
-          .text(`${d.id}`);
-        tooltip_select.select("tspan#tooltip_l2").text(`${d.position}`);
-        tooltip_select.select("tspan#tooltip_l3").text(`${d.value}`);
+
+        tooltip_snp.style("display", null);
+
+        tooltip_snp.select("tspan#tooltip_l1").text(`snp : ${d.id}`);
+        tooltip_snp.select("tspan#tooltip_l2").text(`beta : ${d.beta}`);
+        tooltip_snp.select("tspan#tooltip_l3").text(`pval : ${d.value}`);
+        tooltip_snp.select("tspan#tooltip_l4").text(`SE : ${d.se}`);
       })
+
       .on("mouseout.tooltipSnp", function (d) {
         svg.select(".tooltipSnp").style("display", "none");
       });
   };
 
+  const _tooltip_cpg = function _tooltip_cpg(selection) {
+    const tooltip_cpg = svg.select(".tooltipCpg");
+
+    selection
+      .on("mouseover.tooltipCpg", function (d) {
+        console.log("success");
+        tooltip_cpg.attr(
+          "transform",
+          `translate(${[d3.mouse(this)[0] + 70, d3.mouse(this)[1] - 50]})`,
+        );
+
+        tooltip_cpg.style("display", null);
+        tooltip_cpg.select("tspan#tooltip_l1").text(`cpg : ${d.id}`);
+        tooltip_cpg
+          .select("tspan#tooltip_l2")
+          .text(`gene : ${uniqueGenes(d.gene)}`);
+      })
+
+      .on("mouseout.tooltipSnp", function (d) {
+        svg.select(".tooltipCpg").style("display", "none");
+      });
+  };
+
   // tooltip creation
 
-  const tooltip = plot
+  const tooltipCpg = svg
+    .append("g")
+    .attr("class", "tooltipCpg")
+    .style("display", "none");
+
+  const tooltipSnp = svg
     .append("g")
     .attr("class", "tooltipSnp")
     .style("display", "none");
 
-  tooltip
+  tooltipSnp
     .append("rect")
-    .attr("height", 80)
-    .attr("width", 80)
-    .attr("fill", "beige")
-    .style("opacity", 0.65);
+    .attr("height", 100)
+    .attr("width", 200)
+    .attr("fill", "#111111")
+    .style("opacity", 0.9);
 
-  let text_zone = tooltip
+  tooltipCpg
+    .append("rect")
+    .attr("height", 50)
+    .attr("width", 200)
+    .attr("fill", "#111111")
+    .style("opacity", 0.9);
+
+  let text_zone_cpg = tooltipCpg
     .append("text")
-    .attr("x", 10)
-    .attr("dy", "0")
-    .style("font-family", "sans-serif")
-    .attr("font-size", "11px")
+    .attr("x", 0)
+    .attr("dy", 20)
+    .attr("font-size", "14")
     .style("text-anchor", "start")
-    .style("fill", "black");
+    .style("fill", "white");
 
-  text_zone
+  text_zone_cpg
+    .append("tspan")
+    .attr("id", "tooltip_l1")
+    .attr("x", 10)
+    .attr("dy", 20);
+
+  text_zone_cpg
     .append("tspan")
     .attr("id", "tooltip_l2")
     .attr("x", 10)
-    .attr("dy", "14");
+    .attr("dy", 20);
 
-  text_zone
+  text_zone_cpg
     .append("tspan")
     .attr("id", "tooltip_l3")
     .attr("x", 10)
-    .attr("dy", "14");
+    .attr("dy", 20);
 
-  text_zone
+  text_zone_cpg
     .append("tspan")
     .attr("id", "tooltip_l4")
     .attr("x", 10)
-    .attr("dy", "14");
+    .attr("dy", 20);
+
+  let text_zone_snp = tooltipSnp
+    .append("text")
+    .attr("x", 0)
+    .attr("dy", 20)
+    .attr("font-size", "14")
+    .style("text-anchor", "start")
+    .style("fill", "white");
+
+  text_zone_snp
+    .append("tspan")
+    .attr("id", "tooltip_l1")
+    .attr("x", 10)
+    .attr("dy", 20);
+
+  text_zone_snp
+    .append("tspan")
+    .attr("id", "tooltip_l2")
+    .attr("x", 10)
+    .attr("dy", 20);
+
+  text_zone_snp
+    .append("tspan")
+    .attr("id", "tooltip_l3")
+    .attr("x", 10)
+    .attr("dy", 20);
+
+  text_zone_snp
+    .append("tspan")
+    .attr("id", "tooltip_l4")
+    .attr("x", 10)
+    .attr("dy", 20);
 
   // make sure that none of area outside the brush extension will be drawn
 
@@ -173,7 +248,7 @@ export function manhattanPlot(snpData, cpgData, chordData, limit) {
     .attr("r", tickSize)
     .attr("fill", (d) => betaColor(d["beta"]))
     .attr("clip-path", "url(#clip)")
-    .call(_tooltip);
+    .call(_tooltip_snp);
 
   // scatter points for cpg
 
@@ -190,7 +265,8 @@ export function manhattanPlot(snpData, cpgData, chordData, limit) {
     .attr("fill", (d) => {
       return "#ff6400";
     })
-    .attr("clip-path", "url(#clip)");
+    .attr("clip-path", "url(#clip)")
+    .call(_tooltip_cpg);
 
   // curve prototype between snp and cpg layer
 
@@ -312,8 +388,17 @@ export function manhattanPlot(snpData, cpgData, chordData, limit) {
       console.log(start, end);
       const a = chordSvg
         .selectAll("path")
-        .filter((d) => d.values[0]["x"] >= start && d.values[0]["x"] <= end);
+        .filter(
+          (d) =>
+            d.values[0]["x"] < start ||
+            d.values[0]["x"] > end ||
+            d.values[2]["x"] < start ||
+            d.values[2]["x"] > end,
+        )
+        .style("visibility", "hidden");
       console.log(a);
+    } else {
+      chordSvg.selectAll("path").style("visibility", "visible");
     }
   }
 }

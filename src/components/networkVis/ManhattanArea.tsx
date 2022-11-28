@@ -26,20 +26,22 @@ function ManhattanArea(props) {
   useEffect(() => {
     let snpScatterData = props.data.rows.map(function (d) {
       return {
-        id: "snp" + d["snp"].replace(":", "_"),
+        id: d["snp"].replace(":", "_"),
         position: d["snp_pos"],
         value: d["pval"] == 0 ? 0 : -Math.log10(d["pval"]).toFixed(2),
-        label: "snp " + d["snp"],
+        label: d["snp"],
         size: d["n"],
         beta: d["beta"].toFixed(2),
+        se: d["se"],
       };
     });
 
     let cpgScatterData = props.data.rows.map(function (d) {
       return {
-        id: "cpg" + d["cpg"],
+        id: d["cpg"],
         position: d["cpg_pos"],
-        label: "cpg " + d["cpg"],
+        label: d["cpg"],
+        gene: d["UCSC_RefGene_Name"],
       };
     });
 
