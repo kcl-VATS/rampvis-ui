@@ -102,6 +102,7 @@ function CisLoad(props) {
 
     props.setCpgData(gridData);
     props.popupClose();
+    props.setCollapse();
   };
 
   const createMarks = (min, max, scale = 1) => {

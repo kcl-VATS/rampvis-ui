@@ -130,6 +130,7 @@ function TransLoad(props) {
     props.popupClose();
     props.setCpgData(gridData);
     props.setCircosData(gridData);
+    props.setCollapse();
   };
 
   const createMarks = (min, max, scale = 1) => {

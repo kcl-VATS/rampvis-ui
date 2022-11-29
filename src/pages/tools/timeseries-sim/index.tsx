@@ -198,6 +198,7 @@ const TimeseriesSim = () => {
                     file={fileToNetwork}
                     setFile={setFileToNetwork}
                     setCpgData={setCisCpgData}
+                    setCollapse={handleManhattanExpandClick}
                   />
                 </Grid>
 
@@ -210,6 +211,7 @@ const TimeseriesSim = () => {
                     setFile={setFileToNetwork}
                     setCpgData={setTransCpgData}
                     setCircosData={setCircosData}
+                    setCollapse={handleCircosExpandClick}
                   />
                 </Grid>
 
